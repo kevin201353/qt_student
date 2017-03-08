@@ -27,6 +27,7 @@ public:
     DataBuf m_data;
     void Lock();
     void UnLock();
+    void GetAddrMac();
 public:
     int connect_vm(char *ip, char *port, char *vmid);
 private:

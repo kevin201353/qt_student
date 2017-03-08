@@ -76,12 +76,7 @@ void ActiveMQProduce::initialize()
 
 void ActiveMQProduce::send(const char* Message,int nSize)
 {
-    // 消息内容
- //      std::string threadIdStr = Long::toString( Thread::getId() );
-    // 创建一个文本类型的消息
     bytesMessage = session->createBytesMessage((unsigned char*)Message,nSize);
-    // 发送消息
-      // printf( "Sent message  from thread %s\n", threadIdStr.c_str() );
     producer->send(bytesMessage );
 }
 
@@ -219,52 +214,56 @@ void ActiveMQConsumer::onMessage( const Message* message )
     static int count = 0;
     try
     {
-//        count++;
-//        const BytesMessage* bytesMessage = dynamic_cast< const BytesMessage* >( message );
-//        string text;
-//        if( bytesMessage != NULL )
-//        {
-//            text.assign((char *)(bytesMessage->getBodyBytes()),(bytesMessage->getBodyLength()));
-//            g_pLog->WriteLog(0,"zhaosenhua amq received Message data len : %d.\n", bytesMessage->getBodyLength());
-//        }
-//        else
-//        {
-//            text = "NOT A BYTESMESSAGE!";
-//        }
-//        if( clientAck )
-//        {
-//            char MessageBuf[1024];
-//            memset(MessageBuf,0,1024);
-//            sprintf(MessageBuf,"###ap_confirmclassstatus###{\"data\":{\"id\":\"%s\"}}",g_strTerminalID);
+        count++;
+        const BytesMessage* bytesMessage = dynamic_cast< const BytesMessage* >( message );
+        string text;
+        if( bytesMessage != NULL )
+        {
+            text.assign((char *)(bytesMessage->getBodyBytes()),(bytesMessage->getBodyLength()));
+            g_pLog->WriteLog(0,"zhaosenhua amq received Message data len : %d.\n", bytesMessage->getBodyLength());
+        }
+        else
+        {
+            text = "NOT A BYTESMESSAGE!";
+        }
+        if( clientAck )
+        {
+            char MessageBuf[1024];
+            memset(MessageBuf,0,1024);
+            sprintf(MessageBuf,"###ap_confirmclassstatus###{\"data\":{\"id\":\"%s\"}}",g_strTerminalID);
 
-//            BytesMessage *bytesMessage;
-//            bytesMessage = session->createBytesMessage((unsigned char*)MessageBuf,strlen(MessageBuf));
-//            // 发送消息
-//            // printf( "Sent message  from thread %s\n", threadIdStr.c_str() );
-//            producer->send(bytesMessage);
-//            g_pLog->WriteLog(0,"zsh send message: %s\n", MessageBuf);
-//           // message->acknowledge();
-//        }
-//        g_pLog->WriteLog(0,"Message #%d Received: %s\n", count, text.c_str());
+            BytesMessage *bytesMessage;
+            bytesMessage = session->createBytesMessage((unsigned char*)MessageBuf,strlen(MessageBuf));
+            // 发送消息
+            // printf( "Sent message  from thread %s\n", threadIdStr.c_str() );
+            producer->send(bytesMessage);
+            g_pLog->WriteLog(0,"zsh send message: %s\n", MessageBuf);
+           // message->acknowledge();
+        }
+        g_pLog->WriteLog(0,"Message #%d Received: %s\n", count, text.c_str());
 //        g_pProcess->m_data.s_IsArray = false;
 //        memset(g_pProcess->m_data.Data,0,DATABUFLEN);
 //        strncpy(g_pProcess->m_data.Data,text.c_str(),DATABUFLEN);
 //        g_pProcess->m_data.s_IsArray = true;
+        //test
+        //char sztmp[1024] = {0};
+        //sprintf(sztmp, "Message #%d Received: %s\n", count, text.c_str());
+        //qDebug() << QString(sztmp);
+        //test end
+        QueMsg msg;
+        strcpy(msg.Data, text.c_str());
+        g_MsgQueue.AddQueMsg(msg);
 
-        const TextMessage *txtMsg = dynamic_cast<const TextMessage*>(message);
-        if (txtMsg != NULL) {
-            std::string body = txtMsg->getText();
-            char sztmp[1024] = {0};
-            sprintf(sztmp, "Message #%d Received: %s\n", count, body.c_str());
-            qDebug() << QString(sztmp);
-            QueMsg msg;
-            strcpy(msg.Data, body.c_str());
-            g_MsgQueue.AddQueMsg(msg);
-//            g_pProcess->m_data.s_IsArray = false;
-//            memset(g_pProcess->m_data.Data,0,DATABUFLEN);
-//            strncpy(g_pProcess->m_data.Data,body.c_str(),DATABUFLEN);
-//            g_pProcess->m_data.s_IsArray = true;
-        }
+//        const TextMessage *txtMsg = dynamic_cast<const TextMessage*>(message);
+//        if (txtMsg != NULL) {
+//            std::string body = txtMsg->getText();
+//            char sztmp[1024] = {0};
+//            sprintf(sztmp, "Message #%d Received: %s\n", count, body.c_str());
+//            qDebug() << QString(sztmp);
+//            QueMsg msg;
+//            strcpy(msg.Data, body.c_str());
+//            g_MsgQueue.AddQueMsg(msg);
+//        }
     }
     catch (CMSException& e)
     {

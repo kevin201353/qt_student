@@ -20,6 +20,9 @@ void qthread::run()
         {
             qDebug() << "start show netoff dailog.\n";
             emit NoticeShow();
+        }else
+        {
+            emit NoticeHide();
         }
         sleep(2);
     }

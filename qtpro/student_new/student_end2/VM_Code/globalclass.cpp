@@ -75,6 +75,17 @@ void msg_queue_del()
     }
 }
 
+struct msg_st data;
+void msg_recv(char* dataT)
+{
+    long int msgtype = 1;
+    if (msgrcv(g_msgid, (void*)&data, MAX_TEXT, msgtype, IPC_NOWAIT) == -1)
+    {
+        fprintf(stderr, "msgrcv failed width errno: %d\n", errno);
+    }
+    strcpy(dataT, (char*)data.text);
+}
+
 //return 0: net Unreachable
 int ping_net(char *ip)
 {

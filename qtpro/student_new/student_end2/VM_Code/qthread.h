@@ -16,6 +16,7 @@ protected:
     void run();
 signals:
     void NoticeShow();
+    void NoticeHide();
 private:
     bool m_stop;
 };

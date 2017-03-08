@@ -23,6 +23,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "qthread.h"
+#include "waitstudialog.h"
+#include "waitstu2.h"
 
 #define LOGOPNG      "/usr/local/shencloud/image1/Logo_Student.png"
 #define DESKTOPMAP  "/usr/local/shencloud/image1/Top_Student1.png"
@@ -76,6 +78,8 @@ public:
     QGroupBox   *m_pGroupWigdet;
     SetForm     *m_pSetForm;
     MyDialog    *m_pMyDialog;
+    //WaitstuDialog  *m_waitstuDialog;
+    waitstu2    *m_waitstu;
     void Thread();
     void SetChecked();
     void createPipe();
@@ -98,6 +102,7 @@ private slots:
     void on_EnterPushButton();
     void on_LableDoubleClicked();
     void UpdateNetOffDialog();
+    void HideNetOffDialog();
 private:
     Ui::LoginWidget *ui;
     QLabel *m_pLogoQLable;

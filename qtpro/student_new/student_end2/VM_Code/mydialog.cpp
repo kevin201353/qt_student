@@ -75,30 +75,31 @@ void MyDialog::setNetOff(QString text, int flag)
     m_flag = flag;
     m_content = text;
     m_pTextLabel->setText(text);
-    m_nCount = 10;
-    m_timer = NULL;
-    m_timer = new QTimer(this);
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
-    m_timer->start(1000);
+    //m_nCount = 10;
+    //m_timer = NULL;
+    //m_timer = new QTimer(this);
+    //connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
+    //m_timer->start(1000);
 }
 
 void MyDialog::update()
 {
-    if (m_nCount == 0)
-    {
-        if (m_timer != NULL)
-        {
-            m_timer->stop();
-            delete m_timer;
-            m_timer = NULL;
-            this->hide();
-        }
-    }
-    QString str;
-    str = str.number(m_nCount, 10);
-    QString strMsg;
-    strMsg = m_content + " " + "(" + str + ")";
-    qDebug() << strMsg;
-    m_pTextLabel->setText(strMsg);
-    m_nCount--;
+//    if (m_nCount == 0)
+//    {
+//        if (m_timer != NULL)
+//        {
+//            m_timer->stop();
+//            delete m_timer;
+//            m_timer = NULL;
+//            setShow(false);
+//            this->hide();
+//        }
+//    }
+//    QString str;
+//    str = str.number(m_nCount, 10);
+//    QString strMsg;
+//    strMsg = m_content + " " + "(" + str + ")";
+//    qDebug() << strMsg;
+//    m_pTextLabel->setText(strMsg);
+//    m_nCount--;
 }

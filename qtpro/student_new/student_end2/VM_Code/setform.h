@@ -14,6 +14,7 @@
 #include <QMouseEvent>
 #include <QComboBox>
 #include "mydialog.h"
+#include <QLabel>
 
 namespace Ui {
 class SetForm;
@@ -49,6 +50,7 @@ public:
     {
         m_pSavePushButton->setEnabled(falg);
     }
+    void saveRoomSeat();
 private slots:
     void on_CancelpushButton_clicked();
 
@@ -117,9 +119,10 @@ public:
     QComboBox        *m_pRoomNumcomboBox;
     QLineEdit        *m_pSeatLineEdit;
     MyDialog         *m_pMyDialog;
+    bool            m_bSetRoomfail;
+    QLabel*           m_tiplabel;
 private:
     bool isInvalidNetmask(const char *subnet);
-    void saveRoomSeat();
 };
 
 #endif // SETFORM_H

@@ -14,6 +14,7 @@
 #define USER_WAITINGDLG_RESET  102
 #define USER_AMQ_RESET         103
 #define USER_MSG_NETDOWN       104
+#define USER_MSG_NETDLG_HIDE   105
 #define QUE_MSG_LEN 1024  
 
 #define FIFO_PIPE   "/usr/local/shencloud/student_fifo"
@@ -45,6 +46,7 @@ void call_msg_back(MsgCallBackFun fun, struct ReportMsg msg);
 extern void create_msg_queue();
 extern void msg_send(char* dataTmp);
 extern void msg_queue_del();
+extern void msg_recv(char* dataT);
 extern void amq_monitor();
 extern bool    g_exitMonitoramq;
 extern pthread_t g_monitoramq;

@@ -113,7 +113,7 @@ LoginWidget::LoginWidget(QWidget *parent) :
     //m_pEnterPushButton->setEnabled(false);
     //170303
     //test
-    m_pGroupWigdet->setEnabled(true);
+    //m_pGroupWigdet->setEnabled(true);
     //test end
     connect(m_pLeftPushButton,SIGNAL(clicked()),this,SLOT(on_LeftPushButton()));
     connect(m_pRightPushButton,SIGNAL(clicked()),this,SLOT(on_RightPushButton()));
@@ -124,6 +124,9 @@ LoginWidget::LoginWidget(QWidget *parent) :
     connect(m_pClassName1,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
     connect(m_pClassName2,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
     connect(m_pClassName3,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
+
+    //m_waitstuDialog = new WaitstuDialog();
+    m_waitstu = new waitstu2();
     g_pNetConfig = new NetConfig();
     if(g_pLog == NULL)
     {
@@ -162,19 +165,16 @@ LoginWidget::LoginWidget(QWidget *parent) :
         g_Pproduce = new ActiveMQProduce();
     }
     g_bSetupAmq = false;
-    create_msg_queue();
+    //create_msg_queue();
     wait_net_setup();
     g_resetamq = false;
     g_exitMonitoramq = false;
     g_bshowwaitstu = false;
     amq_monitor();
-    if(pthread_create(&g_amqpid,NULL,InitThread,this))
-    {
-
-    }
     m_pqthread = NULL;
     m_pqthread = new qthread();
     connect(m_pqthread, SIGNAL(NoticeShow()), this, SLOT(UpdateNetOffDialog()));
+    connect(m_pqthread, SIGNAL(NoticeHide()), this, SLOT(HideNetOffDialog()));
     m_pqthread->start();
     m_pSetRoomSeat = new SetRoomSeatDialog(this);
     m_bExitThread = false;
@@ -195,6 +195,10 @@ LoginWidget::LoginWidget(QWidget *parent) :
         delete date;
         date = NULL;
     }
+    if(pthread_create(&g_amqpid,NULL,InitThread,this))
+    {
+
+    }
 }
 
 void *InitThread(void *param)
@@ -204,6 +208,15 @@ void *InitThread(void *param)
 
     LoginWidget *pLoginWidget = (LoginWidget *)param;
     g_resetamq = false;
+//    char data[100] = {0};
+//    for(int i=0; i<10; i++)
+//    {
+//        memset(data, 0, 100);
+//        msg_recv(data);
+//        if (strcmp(data, "0") == 0)
+//            break;
+//        qDebug() << "msg queue have message:  " + QString(data);
+//    }
     while(true)
     {
         if (g_bSetupAmq)
@@ -225,6 +238,7 @@ void *InitThread(void *param)
     {
         g_Pproduce->start(g_strProduceAdd,20,g_strProduceQueue,false,false);
     }
+    g_pProcess->GetAddrMac();
     ///////////////////////////////////////////////////////////////
     char TempBuf[1024];
     char JsonBuf[10240];
@@ -255,7 +269,7 @@ void *InitThread(void *param)
     iRecode = pMyJson->ReadJson(strClassRoomName, "data", "list", "name", 20);
     for (int i=0; i<iRecode; i++)
     {
-        if (strcmp(g_strRoomNum, strClassRoomName[i] == 0))
+        if (strcmp(g_strRoomNum, strClassRoomName[i]) == 0)
         {
             pLoginWidget->m_pSetForm->m_pRoomNumcomboBox->addItem(QString(g_strRoomNum));
             break;
@@ -263,7 +277,7 @@ void *InitThread(void *param)
     }
     for (int i=0; i<iRecode; i++)
     {
-        if (strcmp(g_strRoomNum, strClassRoomName[i]))
+        if (strcmp(g_strRoomNum, strClassRoomName[i]) != 0)
         {
             pLoginWidget->m_pSetForm->m_pRoomNumcomboBox->addItem(QString(strClassRoomName[i]));
         }
@@ -380,12 +394,22 @@ LoginWidget::~LoginWidget()
 //        delete g_Loadingwnd;
 //        g_Loadingwnd = NULL;
 //    }
-    msg_queue_del();
+//    msg_queue_del();
     pthread_join(g_monitoramq, NULL);
     if (m_pqthread)
     {
         m_pqthread->stop();
         delete m_pqthread;
+    }
+//    if (m_waitstuDialog)
+//    {
+//        delete m_waitstuDialog;
+//        m_waitstuDialog = NULL;
+//    }
+    if (m_waitstu)
+    {
+        delete m_waitstu;
+        m_waitstu = NULL;
     }
     delete ui;
 }
@@ -569,6 +593,9 @@ static void *thrd_connect(void *)
         run_count++;
         sleep(1);
     }//while
+    ReportMsg reportmsg;
+    reportmsg.action = USER_WAITINGDLG_EXIT;
+    call_msg_back(msg_respose, reportmsg);
     return NULL;
 }
 
@@ -577,15 +604,11 @@ void LoginWidget::on_EnterPushButton()
     ReportMsg reportmsg;
     reportmsg.action = USER_WAITINGDLG_SHOW;
     call_msg_back(msg_respose, reportmsg);
-    m_pEnterPushButton->setEnabled(false);
+    //m_pEnterPushButton->setEnabled(false);
     if(pthread_create(&g_contid,NULL,thrd_connect, NULL))
     {
         printf("create Thread Error");
     }
-    pthread_join(g_contid, NULL);
-    reportmsg.action = USER_WAITINGDLG_EXIT;
-    call_msg_back(msg_respose, reportmsg);
-    m_pEnterPushButton->setEnabled(true);
 }
 void LoginWidget::keyPressEvent(QKeyEvent *event)
 {
@@ -635,11 +658,23 @@ void LoginWidget::UpdateNetOffDialog()
 {
     if (m_pMyDialog)
     {
+        qDebug() << "hide netoff dailog 0000.";
         if (!m_pMyDialog->getShow())
         {
+            qDebug() << "hide netoff dailog.";
             m_pMyDialog->setShow(true);
             m_pMyDialog->show();
-            m_pMyDialog->setNetOff("network off, Please contact manager!", 5);
+            m_pMyDialog->setNetOff("网络异常，请联系管理员!", 5);
         }
+    }
+}
+
+void LoginWidget::HideNetOffDialog()
+{
+    if (m_pMyDialog)
+    {
+        qDebug() << "hide netoff dailog 11111.";
+        m_pMyDialog->setShow(false);
+        m_pMyDialog->hide();
     }
 }

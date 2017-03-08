@@ -13,8 +13,6 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        loginwidget.cpp \
-    setform.cpp \
     classmould.cpp \
     netconfig.cpp \
     globalclass.cpp \
@@ -35,7 +33,10 @@ SOURCES += main.cpp\
     waitstu2.cpp \
     myqueue.cpp \
     classnameconfig.cpp \
-    qthread.cpp
+    qthread.cpp \
+    loginwidget.cpp \
+    setform.cpp \
+    waitstudialog.cpp
 
 HEADERS  += loginwidget.h \
     setform.h \
@@ -59,7 +60,8 @@ HEADERS  += loginwidget.h \
     waitstu2.h \
     myqueue.h \
     classnameconfig.h \
-    qthread.h
+    qthread.h \
+    waitstudialog.h
 
 FORMS    += loginwidget.ui \
     setform.ui \
@@ -67,7 +69,8 @@ FORMS    += loginwidget.ui \
     setroomseatdialog.ui \
     mydialog.ui \
     waitstu.ui \
-    waitstu2.ui
+    waitstu2.ui \
+    waitstudialog.ui
 
 LIBS += -lpthread /usr/local/lib/libjsoncpp.a -L /usr/local/ActiveMQ-CPP/lib -lactivemq-cpp
 

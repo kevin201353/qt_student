@@ -3,6 +3,7 @@
 #include "netconfig.h"
 #include <pthread.h>
 #include "include.h"
+#include "global.h"
 
 extern NetConfig   *g_pNetConfig;
 extern char g_strRoomNum[100];
@@ -46,6 +47,7 @@ SetForm::SetForm(QWidget *parent) :
     m_pDNS3LineEdit = ui->DNS3lineEdit;
     m_pRoomNumcomboBox = ui->RoomNumcomboBox;
     m_pSeatLineEdit = ui->SeatlineEdit;
+    m_tiplabel = ui->Tiplabel22;
 
     QRegExp    RegIPLineEdit("((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])[\\.]){3}"
                              "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])");       //expand reg
@@ -78,19 +80,22 @@ SetForm::SetForm(QWidget *parent) :
     ui->SeatNumlabel->setText("座位号");
     ui->title_bar->setStyleSheet("background-color: rgb(0,123,214)");
     connect(ui->btnExit, SIGNAL(clicked(bool)), this, SLOT(exit_widget()));
-    m_pMyDialog = NULL;
-    m_pMyDialog = new MyDialog();
+    ui->Tiplabel22->setText("");
+//    m_pMyDialog = NULL;
+//    m_pMyDialog = new MyDialog(this);
+//    m_pMyDialog->hide();
+    m_bSetRoomfail = false;
 }
 
 SetForm::~SetForm()
 {
     delete m_pRegValue;
     delete ui;
-    if (m_pMyDialog != NULL)
-    {
-        delete m_pMyDialog;
-        m_pMyDialog = NULL;
-    }
+//    if (m_pMyDialog != NULL)
+//    {
+//        delete m_pMyDialog;
+//        m_pMyDialog = NULL;
+//    }
 }
 void SetForm::SetIPLineEdit(const char *ip)
 {
@@ -198,10 +203,13 @@ void *SystemThread(void *param)
     memset(g_strServerIP,0,25);
     strncpy(g_strServerIP,pTemp->m_strServerIP.toStdString().c_str(),25);
     WriteConfigString(CONFIGNAME,"ROOM","ServiceIP",g_strServerIP);
-
     pTemp->SetLoadingFram(false);
     //pTemp->SetSalveEnable(true);
     pTemp->setEnabled(true);
+    if (pTemp->m_bSetRoomfail)
+        pTemp->m_tiplabel->setText("教室名称或座位号设置失败!");
+    else
+        pTemp->m_tiplabel->setText("");
 
 }
 void SetForm::on_SavepushButton_clicked()
@@ -220,7 +228,6 @@ void SetForm::on_SavepushButton_clicked()
     strcpy(g_pNetConfig->m_pNetConfig->s_strDNS[2],m_pDNS3LineEdit->text().toStdString().c_str());
 
     g_pNetConfig->WriteFile();
-
     m_pLoagingFrame->show();
     this->setEnabled(false);
     saveRoomSeat();
@@ -483,12 +490,14 @@ void SetForm::saveRoomSeat()
     {
         WriteConfigString(CONFIGNAME,"ROOM","ClassName",g_strRoomNum);
         WriteConfigString(CONFIGNAME,"ROOM","SeatName",g_strSeatNum);
+        m_bSetRoomfail = false;
     }
     else
     {
         //set failed
-        m_pMyDialog->setFlag(1);
-        m_pMyDialog->setText("setting failed!");
-        m_pMyDialog->show();
+//        m_pMyDialog->setFlag(1);
+//        m_pMyDialog->setText("设置失败!");
+//        m_pMyDialog->show();
+        m_bSetRoomfail = true;
     }
 }

@@ -12,7 +12,6 @@ bool    g_exitMonitoramq;
 pthread_t g_monitoramq;
 volatile bool g_resetamq;
 volatile bool g_bSetupAmq;
-
 void call_msg_back(MsgCallBackFun fun, ReportMsg msg)
 {
     fun(msg);
@@ -69,10 +68,15 @@ void msg_respose(ReportMsg msg)
                 //show waiting dlg show
                 if (!g_bshowwaitstu)
                 {
-                    PIPE_WAIT("0");
-                    if(pthread_create(&g_waitid,NULL,thrd_waitexec, NULL))
+                    //PIPE_WAIT("0");
+//                    if(pthread_create(&g_waitid,NULL,thrd_waitexec, NULL))
+//                    {
+//                        printf("create Thread Error");
+//                    }
+                    if (g_loginWnd)
                     {
-                        printf("create Thread Error");
+                        //g_loginWnd->m_waitstuDialog->WaitStuShow();
+                        g_loginWnd->m_waitstu->waitstushow();
                     }
                     g_bshowwaitstu = true;
                 }
@@ -83,7 +87,12 @@ void msg_respose(ReportMsg msg)
                 qDebug() << "xxxxx starting exit waitstu";
                 g_pLog->WriteLog(0,"zhaosenhua, msg_respose waitstu exit. \n");
                 g_bshowwaitstu = false;
-                PIPE_WAIT("1");
+                //PIPE_WAIT("1");
+                if (g_loginWnd)
+                {
+                    //g_loginWnd->m_waitstuDialog->WaitStuHide();
+                    g_loginWnd->m_waitstu->waitstuhide();
+                }
                 qDebug() << "xxxxx exit waitstu";
             }
             break;
@@ -108,7 +117,7 @@ void msg_respose(ReportMsg msg)
             qDebug() << "zhaosenhua, msg_respose reset amq prcess. network is unreachable.\n";
         }
         break;
-    case USER_MSG_NETDOWN:
+    case USER_MSG_NETDLG_HIDE:
         {
         }
         break;

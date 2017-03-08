@@ -14,7 +14,8 @@ class waitstu2 : public QWidget
 public:
     explicit waitstu2(QWidget *parent = 0);
     ~waitstu2();
-
+    void waitstushow();
+    void waitstuhide();
 private:
     Ui::waitstu2 *ui;
 };

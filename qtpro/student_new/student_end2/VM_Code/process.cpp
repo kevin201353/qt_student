@@ -557,8 +557,9 @@ int process::ProcessThreadNew()
                     g_pLog->WriteLog(0,"/tmp/data_xor:%s",data_xor);
                     fclose(pf);
                 }
-                sprintf(MessageBuf,"###ap_confirmdisplay###{\"datetime\":\"%s\",\"data\":{\"id\":\"%s\", \"mac\":\"%s\", \"connected\":\"true\", \"dsPort\":\"%s\", \"dsXor\":\"%s\"}}", str_time.toStdString().c_str(), g_strTerminalID, m_strMac, port, data_xor);
+                sprintf(MessageBuf,"###ap_confirmdisplay###{\"datetime\":\"%s\",\"data\":{\"id\":\"%s\", \"apIp\":\"%s\",\"mac\":\"%s\", \"connected\":%d, \"dsPort\":%d, \"dsXor\":%d}}", str_time.toStdString().c_str(), g_strTerminalID, m_strIP, m_strMac, true, atoi(port), atoi(data_xor));
                 g_Pproduce->send(MessageBuf, strlen(MessageBuf));
+                g_pLog->WriteLog(0,"zhaosenhua send msg response: %s", MessageBuf);
                 qDebug("display response end.\n");
             }
         }
@@ -730,4 +731,14 @@ int process::connect_vm(char *ip, char *port, char *vmid)
         sleep(1);
     }
     return nRet;
+}
+
+
+void process::GetAddrMac()
+{
+    NetConfig netconfig;
+    memset(m_strIP,0,20);
+    netconfig.GetIPAddr(m_strIP);
+    memset(m_strMac,0,50);
+    netconfig.GetMacAdd(m_strMac,true);
 }
