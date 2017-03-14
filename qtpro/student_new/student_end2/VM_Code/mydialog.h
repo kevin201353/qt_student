@@ -19,6 +19,7 @@
                         "QPushButton:pressed{border-image: url(/usr/local/shencloud/image/DialogCancel.png)}"
 
 #define  SHUTDOWN   0
+#define  PASSFAILD  3
 
 namespace Ui {
 class MyDialog;

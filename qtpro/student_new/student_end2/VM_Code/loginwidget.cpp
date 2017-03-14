@@ -6,6 +6,7 @@
 #include <QDate>
 #include <QDesktopWidget>
 #include "qthread.h"
+#include "buildtime.h"
 
 extern NetConfig   *g_pNetConfig;
 extern void amq_monitor();
@@ -124,7 +125,8 @@ LoginWidget::LoginWidget(QWidget *parent) :
     connect(m_pClassName1,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
     connect(m_pClassName2,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
     connect(m_pClassName3,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
-
+    m_passui = new PasswordUI();
+    connect(m_passui, SIGNAL(ShowPassUI()),this,SLOT(on_ShowPassUI()));
     //m_waitstuDialog = new WaitstuDialog();
     m_waitstu = new waitstu2();
     g_pNetConfig = new NetConfig();
@@ -183,18 +185,18 @@ LoginWidget::LoginWidget(QWidget *parent) :
     m_pSetForm->move(QApplication::desktop()->width()/2 - m_pSetForm->width()/2, QApplication::desktop()->height()/2 - m_pSetForm->height()/2);
     m_pServerManPushButton->hide();
     m_pInformationPushButton->hide();
-    QDate *date = new QDate();
-    QDate date2 = date->currentDate();
-    QString strdate = date2.toString("yyyyMMdd");
+//    QDate *date = new QDate();
+//    QDate date2 = date->currentDate();
+//    QString strdate = date2.toString("yyyyMMdd");
     QString strsoft = m_pSoftInforLabel->text();
     strsoft += ": V1.0_";
-    strsoft += strdate;
+    strsoft += new QString(buildtime);
     m_pSoftInforLabel->setText(strsoft);
-    if (date)
-    {
-        delete date;
-        date = NULL;
-    }
+//    if (date)
+//    {
+//        delete date;
+//        date = NULL;
+//    }
     if(pthread_create(&g_amqpid,NULL,InitThread,this))
     {
 
@@ -416,6 +418,42 @@ LoginWidget::~LoginWidget()
 
 void LoginWidget::on_SetpushButton_clicked()
 {
+    m_passui->show();
+//    if (passui->isAdjustPass())
+//    {
+//        g_pNetConfig->ReadFile();
+//        if(g_pNetConfig->m_pNetConfig->s_bIP)
+//        {
+//            m_pSetForm->SetDHCPSetIPTrue();
+//        }
+//        else
+//        {
+//            m_pSetForm->SetNoDHCPSetIPTrue();
+//        }
+//        if(g_pNetConfig->m_pNetConfig->s_bDNS)
+//        {
+//            m_pSetForm->SetDHCPSetDNSTrue();
+//        }
+//        else
+//        {
+//            m_pSetForm->SetNoDHCPSetDNSTrue();
+//        }
+//        m_pSetForm->SetIPLineEdit(g_pNetConfig->m_pNetConfig->s_strIP);
+//        m_pSetForm->SetMaskIPLineEdit(g_pNetConfig->m_pNetConfig->s_strIPMask);
+//        m_pSetForm->SetGateWayIPLineEdit(g_pNetConfig->m_pNetConfig->s_strGateWay);
+
+//        m_pSetForm->SetDNS1LineEdit(g_pNetConfig->m_pNetConfig->s_strDNS[0]);
+//        m_pSetForm->SetDNS2LineEdit(g_pNetConfig->m_pNetConfig->s_strDNS[1]);
+//        m_pSetForm->SetDNS3LineEdit(g_pNetConfig->m_pNetConfig->s_strDNS[2]);
+
+//        m_pSetForm->setWindowModality(Qt::ApplicationModal);
+//        m_pSetForm->show();
+//    }
+}
+
+void LoginWidget::on_ShowPassUI()
+{
+    m_passui->hide();
     g_pNetConfig->ReadFile();
     if(g_pNetConfig->m_pNetConfig->s_bIP)
     {
@@ -448,9 +486,10 @@ void LoginWidget::on_SetpushButton_clicked()
 void LoginWidget::on_ShutdownpushButton_clicked()
 {
     //this->close();
-    m_pMyDialog->setText("确定关机！");
-    m_pMyDialog->setFlag(SHUTDOWN);
-    m_pMyDialog->show();
+    MyDialog *pshutdlg = new MyDialog();
+    pshutdlg->setText("确定关机！");
+    pshutdlg->setFlag(SHUTDOWN);
+    pshutdlg->show();
 }
 
 void LoginWidget::on_InformationpushButton_clicked()

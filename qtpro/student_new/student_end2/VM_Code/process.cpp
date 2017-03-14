@@ -533,12 +533,20 @@ int process::ProcessThreadNew()
             g_pJson->ReadJson_v(sz_port, "data", "port");
             g_pJson->ReadJson_v(sz_vmid, "data", "vmId");
             m_pWidget->m_pGroupWigdet->setEnabled(false);
+            system("rm -f /tmp/data_*");
             qDebug("begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
             g_pLog->WriteLog(0,"begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
             int nRet = connect_vm(sz_host, sz_port, sz_vmid);
             if (nRet == 1)
             {
                 //connect vm success
+                int nCount = 0;
+                while(access("/tmp/data_port",F_OK))
+                {
+                    if (nCount >= 20)
+                        break;
+                    sleep(1);
+                }
                 char port[20];
                 memset(port,0,20);
                 FILE *pf = fopen("/tmp/data_port","r");
@@ -557,9 +565,11 @@ int process::ProcessThreadNew()
                     g_pLog->WriteLog(0,"/tmp/data_xor:%s",data_xor);
                     fclose(pf);
                 }
-                sprintf(MessageBuf,"###ap_confirmdisplay###{\"datetime\":\"%s\",\"data\":{\"id\":\"%s\", \"apIp\":\"%s\",\"mac\":\"%s\", \"connected\":%d, \"dsPort\":%d, \"dsXor\":%d}}", str_time.toStdString().c_str(), g_strTerminalID, m_strIP, m_strMac, true, atoi(port), atoi(data_xor));
+                g_pLog->WriteLog(0,"/tmp/data_port 11111:%ld", atol(port));
+                g_pLog->WriteLog(0,"/tmp/data_xor 11111:%ld", atol(data_xor));
+                sprintf(MessageBuf,"###ap_confirmdisplay###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\", \"apIp\":\"%s\",\"mac\":\"%s\", \"vmId\":\"%s\", \"connected\":%d, \"dsPort\":%ld, \"dsXor\":%ld}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID, m_strIP, m_strMac, sz_vmid, 1, atol(port), atol(data_xor));
                 g_Pproduce->send(MessageBuf, strlen(MessageBuf));
-                g_pLog->WriteLog(0,"zhaosenhua send msg response: %s", MessageBuf);
+                g_pLog->WriteLog(0,"zhaosenhua send msg response display: %s", MessageBuf);
                 qDebug("display response end.\n");
             }
         }
@@ -578,8 +588,9 @@ int process::ProcessThreadNew()
             if (nRet == 0)
             {
                 //over success
-                 sprintf(MessageBuf,"###ap_confirmclassover###{\"datetime\":\"%s\",\"data\":{\"id\":\"%s\"}}", str_time.toStdString().c_str(), g_strTerminalID);
+                 sprintf(MessageBuf,"###ap_confirmclassover###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
                  g_Pproduce->send(MessageBuf, strlen(MessageBuf));
+                 g_pLog->WriteLog(0,"zhaosenhua send msg response classover: %s", MessageBuf);
             }
             qDebug("classover end.");
         }
@@ -592,7 +603,7 @@ int process::ProcessThreadNew()
             ReportMsg reportmsg;
             reportmsg.action = USER_WAITINGDLG_SHOW;
             call_msg_back(msg_respose, reportmsg);
-            char szCommand[100] = {0};
+            char szCommand[500] = {0};
             g_pJson->ReadJson_v(szCommand, "data", "command");
             qDebug("start_demonstrate command : %s.\n", szCommand);
             g_pLog->WriteLog(0,"start_demonstrate command : %s", szCommand);
@@ -603,8 +614,9 @@ int process::ProcessThreadNew()
             {
                 printf("create Thread Error");
             }
-            sprintf(MessageBuf,"###ap_confirmstartdemonstrate###{\"datetime\":\"%s\",\"data\":{\"id\":\"%s\"}}", str_time.toStdString().c_str(), g_strTerminalID);
+            sprintf(MessageBuf,"###ap_confirmstartdemonstrate###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
             g_Pproduce->send(MessageBuf, strlen(MessageBuf));
+            g_pLog->WriteLog(0,"zhaosenhua send msg response startdemonstrate: %s", MessageBuf);
             qDebug("start_demonstrate end.");
         }
         if (strcmp(ActionBuf,"stop_demonstrate") == 0)
@@ -614,14 +626,15 @@ int process::ProcessThreadNew()
             system("sudo /usr/local/shencloud/enable_input.sh &");
             pthread_t pid;
             memset(MessageBuf,0,100);
-            //system("sudo kill -9 $(pgrep eclass_client)");
+            system("sudo kill -9 $(pgrep eclass_client)");
             system("sudo killall -9 spicy");
             if(pthread_create(&pid,NULL,ThreadForSystem,(void *)g_szRetVm))
             {
                 printf("create Thread Error");
             }
-            sprintf(MessageBuf,"###ap_confirmstopdemonstrate###{\"datetime\":\"%s\",\"data\":{\"id\":\"%s\"}}", str_time.toStdString().c_str(), g_strTerminalID);
+            sprintf(MessageBuf,"###ap_confirmstopdemonstrate###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
             g_Pproduce->send(MessageBuf,strlen(MessageBuf));
+            g_pLog->WriteLog(0,"zhaosenhua send msg response stopdemonstrate: %s", MessageBuf);
             qDebug("stop_demonstrate end.");
         }
         if (strcmp(ActionBuf,"freeStudy") == 0)
@@ -631,7 +644,7 @@ int process::ProcessThreadNew()
             system("sudo kill -9 $(pgrep spicy)");
             system("sudo kill -9 $(pgrep eclass_client)");
             memset(MessageBuf,0,1024);
-            sprintf(MessageBuf,"###ap_confirmfreestudy###{\"datetime\":\"%s\",\"data\":{\"id\":\"%s\"}}", str_time.toStdString().c_str(), g_strTerminalID);
+            sprintf(MessageBuf,"###ap_confirmfreestudy###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
             char JsonBuf[102400];
             char ClassName[MAXCLASS][100];
             char ClassID[MAXCLASS][100];
@@ -652,6 +665,7 @@ int process::ProcessThreadNew()
                 m_pWidget->m_pClassNameConfig->m_iClassNum = 0;
                 m_pWidget->SetChecked();
                 g_Pproduce->send(MessageBuf,strlen(MessageBuf));
+                g_pLog->WriteLog(0,"zhaosenhua send msg response freeStudy: %s", MessageBuf);
                 int iRecode = g_pJson->ReadJson(ClassName,"data","list","name",MAXCLASS);
                 iRecode = g_pJson->ReadJson(ClassID,"data","list","id",MAXCLASS);
                 g_pLog->WriteLog(0,"Study:%d",iRecode);
@@ -708,7 +722,7 @@ int process::connect_vm(char *ip, char *port, char *vmid)
     {
         system("sudo kill -9 $(pgrep spicy)");
     }
-    sprintf(g_szCmd, "sudo spicy -h %s -p %s -f > %s", ip, port, "/usr/local/shencloud/log/spicy.log");
+    sprintf(g_szCmd, "sudo spicy.sh -h %s -p %s -f > %s", ip, port, "/usr/local/shencloud/log/spicy.log");
     strcpy(g_szRetVm, g_szCmd);
     if (pthread_create(&g_xtid, NULL, thrd_exec, NULL) != 0)
     {

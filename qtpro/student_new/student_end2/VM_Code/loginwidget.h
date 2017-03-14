@@ -25,6 +25,7 @@
 #include "qthread.h"
 #include "waitstudialog.h"
 #include "waitstu2.h"
+#include "passwordui.h"
 
 #define LOGOPNG      "/usr/local/shencloud/image1/Logo_Student.png"
 #define DESKTOPMAP  "/usr/local/shencloud/image1/Top_Student1.png"
@@ -103,6 +104,7 @@ private slots:
     void on_LableDoubleClicked();
     void UpdateNetOffDialog();
     void HideNetOffDialog();
+    void on_ShowPassUI();
 private:
     Ui::LoginWidget *ui;
     QLabel *m_pLogoQLable;
@@ -127,6 +129,7 @@ private:
     bool m_bExitThread;
     LoadingFrame * g_Loadingwnd;
     qthread    *m_pqthread;
+    PasswordUI *m_passui;
 protected:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent  *event);

@@ -35,8 +35,9 @@ SOURCES += main.cpp\
     classnameconfig.cpp \
     qthread.cpp \
     loginwidget.cpp \
+    waitstudialog.cpp \
     setform.cpp \
-    waitstudialog.cpp
+    passwordui.cpp
 
 HEADERS  += loginwidget.h \
     setform.h \
@@ -61,7 +62,9 @@ HEADERS  += loginwidget.h \
     myqueue.h \
     classnameconfig.h \
     qthread.h \
-    waitstudialog.h
+    waitstudialog.h \
+    buildtime.h \
+    passwordui.h
 
 FORMS    += loginwidget.ui \
     setform.ui \
@@ -70,7 +73,8 @@ FORMS    += loginwidget.ui \
     mydialog.ui \
     waitstu.ui \
     waitstu2.ui \
-    waitstudialog.ui
+    waitstudialog.ui \
+    passwordui.ui
 
 LIBS += -lpthread /usr/local/lib/libjsoncpp.a -L /usr/local/ActiveMQ-CPP/lib -lactivemq-cpp
 

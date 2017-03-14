@@ -53,7 +53,6 @@ SetForm::SetForm(QWidget *parent) :
     m_pSetTabWidget->setFont(m_Font);
     m_pSetTabWidget->setTabText(0,"网络设置");
     m_pSetTabWidget->setTabText(1,"系统设置");
-	m_pSetTabWidget->setTabText(2,"网络检测");
 
     m_pSavePushButton->setFont(m_Font);
     m_pSavePushButton->setText("保存");
@@ -118,9 +117,6 @@ SetForm::SetForm(QWidget *parent) :
     m_pqthread = NULL;
     m_pqthread = new qthreadPing();
     connect(m_pqthread, SIGNAL(NoticeMsg()), this, SLOT(update()));
-    ui->label_Tip->setText("输入ping ip地址，然后按回车键 如：ping 127.0.0.1  结束: ctrl + c");
-    ui->SeatlineEdit->setText(g_strSeatNum);
-    ui->listWidget_Ping->clear();
 }
 
 SetForm::~SetForm()

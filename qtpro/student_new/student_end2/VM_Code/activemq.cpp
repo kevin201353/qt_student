@@ -10,7 +10,6 @@ MyQueue  g_MsgQueue;
 
 ActiveMQProduce::ActiveMQProduce()
 {
-
 }
 
 ActiveMQProduce::~ActiveMQProduce()
@@ -76,8 +75,11 @@ void ActiveMQProduce::initialize()
 
 void ActiveMQProduce::send(const char* Message,int nSize)
 {
-    bytesMessage = session->createBytesMessage((unsigned char*)Message,nSize);
-    producer->send(bytesMessage );
+     if( producer != NULL )
+     {
+        bytesMessage = session->createBytesMessage((unsigned char*)Message,nSize);
+        producer->send(bytesMessage );
+     }
 }
 
 

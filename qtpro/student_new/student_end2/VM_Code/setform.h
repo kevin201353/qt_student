@@ -15,6 +15,7 @@
 #include <QComboBox>
 #include "mydialog.h"
 #include <QLabel>
+#include <qthread.h>
 
 namespace Ui {
 class SetForm;
@@ -83,7 +84,8 @@ private slots:
     void on_DNS3lineEdit_textChanged(const QString &arg1);
 
     void exit_widget();
-
+    void on_returnPressed();
+    void update();
 protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
@@ -112,6 +114,8 @@ private:
     QLineEdit       *m_pServerIPLineEdit;
     bool             m_moving;
     QPoint           m_LastMousePosition;
+    QString          m_strPing;
+    int              m_pingCount;
 public:
     bool            m_bDHCP_IP;
     bool            m_bDHCP_DNS;
@@ -121,8 +125,10 @@ public:
     MyDialog         *m_pMyDialog;
     bool            m_bSetRoomfail;
     QLabel*           m_tiplabel;
+    qthreadPing*       m_pqthread;
 private:
     bool isInvalidNetmask(const char *subnet);
+    void keyPressEvent(QKeyEvent  *event);
 };
 
 #endif // SETFORM_H
