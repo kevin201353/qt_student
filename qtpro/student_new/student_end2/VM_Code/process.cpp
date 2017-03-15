@@ -476,7 +476,7 @@ void *ProcessFun(void *param)
   //add amq deal
   //170227
 /*********************************************************************/
-int detect_process();
+int detect_process(char* szProcess);
 int process::ProcessThreadNew()
 {
     cMainExitFlag = 1;
@@ -523,7 +523,6 @@ int process::ProcessThreadNew()
         }
         if (strcmp(ActionBuf,"display") == 0)
         {
-            memset(MessageBuf,0,1024);
             //connect vm
             char sz_host[100] = {0};
             char sz_port[50] = {0};
@@ -584,7 +583,7 @@ int process::ProcessThreadNew()
             m_pWidget->m_pGroupWigdet->setEnabled(false);
             system("sudo kill -9 $(pgrep spicy)");
             system("sudo kill -9 $(pgrep eclass_client)");
-            int nRet = detect_process();
+            int nRet = detect_process("spicy");
             if (nRet == 0)
             {
                 //over success
@@ -607,17 +606,21 @@ int process::ProcessThreadNew()
             g_pJson->ReadJson_v(szCommand, "data", "command");
             qDebug("start_demonstrate command : %s.\n", szCommand);
             g_pLog->WriteLog(0,"start_demonstrate command : %s", szCommand);
-            system("sudo killall -9 spicy");
-            system("sudo /usr/local/shencloud/disable_input.sh &");
-            strcat(szCommand, " >>/usr/local/shencloud/log/Eclass.log");
-            if(pthread_create(&pid, NULL,ThreadForSystem, szCommand))
+            int nRet = detect_process("eclass_client");
+            if (nRet == 0)
             {
-                printf("create Thread Error");
+                system("sudo killall -9 spicy");
+                system("sudo /usr/local/shencloud/disable_input.sh &");
+                strcat(szCommand, " >>/usr/local/shencloud/log/Eclass.log");
+                if(pthread_create(&pid, NULL,ThreadForSystem, szCommand))
+                {
+                    printf("create Thread Error");
+                }
+                sprintf(MessageBuf,"###ap_confirmstartdemonstrate###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
+                g_Pproduce->send(MessageBuf, strlen(MessageBuf));
+                g_pLog->WriteLog(0,"zhaosenhua send msg response startdemonstrate: %s", MessageBuf);
+                qDebug("start_demonstrate end.");
             }
-            sprintf(MessageBuf,"###ap_confirmstartdemonstrate###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
-            g_Pproduce->send(MessageBuf, strlen(MessageBuf));
-            g_pLog->WriteLog(0,"zhaosenhua send msg response startdemonstrate: %s", MessageBuf);
-            qDebug("start_demonstrate end.");
         }
         if (strcmp(ActionBuf,"stop_demonstrate") == 0)
         {
@@ -686,14 +689,14 @@ int process::ProcessThreadNew()
 }
 
 #define BUF_SIZE  150
-int detect_process()
+int detect_process(char* szProcess)
 {
     int nRet = 0;
     FILE* fp = NULL;
     int count = 0;
     char buf[BUF_SIZE] = {0};
     char command[BUF_SIZE] = {0};
-    sprintf(command, "sudo ps -ef | grep spicy | grep -v grep | wc -l");
+    sprintf(command, "sudo ps -ef | grep %s | grep -v grep | wc -l", szProcess);
     fp = popen(command, "r");
     if (fp == NULL)
     {
@@ -717,10 +720,11 @@ int process::connect_vm(char *ip, char *port, char *vmid)
 {
     if (ip == NULL || port == NULL)
         return -1;
-    int nRet = detect_process();
+    int nRet = detect_process("spicy");
     if (nRet == 1)
     {
-        system("sudo kill -9 $(pgrep spicy)");
+        //system("sudo kill -9 $(pgrep spicy)");
+        return 2;
     }
     sprintf(g_szCmd, "sudo spicy.sh -h %s -p %s -f > %s", ip, port, "/usr/local/shencloud/log/spicy.log");
     strcpy(g_szRetVm, g_szCmd);
@@ -732,7 +736,7 @@ int process::connect_vm(char *ip, char *port, char *vmid)
     nRet = 0;
     while(1)
     {
-        nRet = detect_process();
+        nRet = detect_process("spicy");
         if (nRet == 1)
         {
             break;
