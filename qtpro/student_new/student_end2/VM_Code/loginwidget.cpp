@@ -14,20 +14,70 @@ extern volatile bool g_resetamq;
 extern bool g_bshowwaitstu;
 extern volatile bool g_bSetupAmq;
 extern int g_msgid;
+static pthread_t g_spicypid = NULL;
 
 LoginWidget * g_loginWnd = NULL;
 void *InitThread(void *param);
 static pthread_t g_xtid = 0;
 static char g_szCmd[1024] = {0};
+static bool g_ExitMsThread = false;
+
+#define SPICY_LOG_PATH  "/usr/local/shencloud/log/spicy.log"
+
 static void *thrd_exec(void *param)
 {
     PIPE_SPICYLOG(g_szCmd);
-    FILE *fp;
-    if ((fp = popen(g_szCmd, "r")) == NULL)
+//    FILE *fp;
+//    if ((fp = popen(g_szCmd, "r")) == NULL)
+//    {
+//        g_pLog->WriteLog(0,"zhaosenhua thrd_exec spicy cmd failed.");
+//    }
+//    pclose(fp);
+//    MyMutex_lock();
+    system(g_szCmd);
+//    MyMutex_unlock();
+    return NULL;
+}
+
+static void *MonitorSpicy(void *param)
+{
+    while(true)
     {
-        g_pLog->WriteLog(0,"zhaosenhua thrd_exec spicy cmd failed.");
+        if (g_ExitMsThread)
+            break;
+        MyMutex_lock();
+        FILE *pp = fopen(SPICY_LOG_PATH, "r");
+        if (pp)
+        {
+            char tmp[512] = {0};
+            int nCount = 0;
+            while (fgets(tmp, sizeof(tmp), pp) != NULL)
+            {
+                if (nCount == 5)
+                    break;
+                if (tmp[strlen(tmp) -1] == '\n')
+                {
+                    tmp[strlen(tmp) - 1] = '\0';
+                }
+                QString str = QString::fromStdString(tmp);
+                qDebug() << "monitor spicy data: " + str;
+                if (str == "signal_handler signum=6")
+                {
+                    g_pLog->WriteLog(0,"zhaosenhua spicy exception, CloudClassRoom_Student reboot.");
+                    qDebug("zhaosenhua spicy exception, CloudClassRoom_Student reboot.");
+                    fclose(pp);
+                    MyMutex_unlock();
+                    system("sudo rm /usr/local/shencloud/log/spicy.log");
+                    system("sudo killall CloudClassRoom_Student");
+                    return NULL;
+                }
+                nCount++;
+            }
+            fclose(pp);
+        }
+        MyMutex_unlock();
+        sleep(2);
     }
-    pclose(fp);
     return NULL;
 }
 
@@ -37,7 +87,9 @@ LoginWidget::LoginWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setAutoFillBackground(true);
+    g_loginWnd = NULL;
     g_loginWnd = this;
+    //InitMyMutex();
     m_pLogoQLable = ui->Logolabel;
     m_pLogoQLable->setAlignment(Qt::AlignCenter);
     //m_pLogoQLable->setPixmap(QPixmap(LOGOPNG));
@@ -189,7 +241,7 @@ LoginWidget::LoginWidget(QWidget *parent) :
 //    QDate date2 = date->currentDate();
 //    QString strdate = date2.toString("yyyyMMdd");
     QString strsoft = m_pSoftInforLabel->text();
-    strsoft += ": V1.0_";
+    strsoft += ": V1.2_";
     strsoft += new QString(buildtime);
     m_pSoftInforLabel->setText(strsoft);
 //    if (date)
@@ -201,6 +253,11 @@ LoginWidget::LoginWidget(QWidget *parent) :
     {
 
     }
+//    g_ExitMsThread = false;
+//    if(pthread_create(&g_spicypid,NULL,MonitorSpicy,this))
+//    {
+
+//    }
 }
 
 void *InitThread(void *param)
@@ -413,6 +470,8 @@ LoginWidget::~LoginWidget()
         delete m_waitstu;
         m_waitstu = NULL;
     }
+    //g_ExitMsThread = true;
+    //MyMutex_destroy();
     delete ui;
 }
 
@@ -582,7 +641,7 @@ static void *thrd_connect(void *)
             int ncount = 0;
             while(access("/tmp/data_port",F_OK))
             {
-                if (ncount >= 10)
+                if (ncount >= 20)
                 {
                     break;
                 }

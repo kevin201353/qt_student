@@ -50,12 +50,25 @@ static void *thrd_exec(void *param)
     strcat(szcmdTmp, " ----- ");
     strcat(szcmdTmp, g_szCmd);
     PIPE_SPICYLOG(szcmdTmp);
-    FILE *fp;
-    if ((fp = popen(g_szCmd, "r")) == NULL)
-    {
-        g_pLog->WriteLog(0,"zhaosenhua thrd_exec spicy cmd failed.");
-    }
-    pclose(fp);
+//    FILE *fp;
+//    if ((fp = popen(g_szCmd, "r")) == NULL)
+//    {
+//        g_pLog->WriteLog(0,"zhaosenhua thrd_exec spicy cmd failed.");
+//    }
+//    FILE *wstream;
+//    char buf[512] = {0};
+//    wstream = fopen("test_popen.txt", "w+");
+//    if (wstream != NULL)
+//    {
+//        fread(buf, sizeof(char), sizeof(buf), fp);
+//        fwrite(buf, 1, sizeof(buf), wstream);
+//        fclose(wstream);
+//    }
+//    pclose(fp);
+//    MyMutex_lock();
+    system(g_szCmd);
+ //   MyMutex_unlock();
+ //   g_pLog->WriteLog(0,"zhaosenhua thrd_exec spicy running success.");
     return NULL;
 }
 
@@ -491,6 +504,7 @@ int process::ProcessThreadNew()
         if (g_MsgQueue.IsEmpty())
         {
             qDebug("msg queue is empty.\n");
+            //g_pLog->WriteLog(0,"msg queue is empty.");
             last_time = __GetTime();
             sleep(1);
             continue;
@@ -508,6 +522,7 @@ int process::ProcessThreadNew()
         if (leasped > 30000)
         {
               qDebug()<< "msg deal timeout, msg resend.";
+              //g_pLog->WriteLog(0,"msg deal timeout, msg resend.");
               last_time = __GetTime();
               continue;
         }
@@ -570,6 +585,10 @@ int process::ProcessThreadNew()
                 g_Pproduce->send(MessageBuf, strlen(MessageBuf));
                 g_pLog->WriteLog(0,"zhaosenhua send msg response display: %s", MessageBuf);
                 qDebug("display response end.\n");
+            }
+            if (nRet == 0)
+            {
+                 g_pLog->WriteLog(0,"sh msg display failed.");
             }
         }
         if (strcmp(ActionBuf,"classover") == 0)

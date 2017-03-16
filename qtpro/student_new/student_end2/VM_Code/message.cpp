@@ -73,7 +73,7 @@ void msg_respose(ReportMsg msg)
 //                    {
 //                        printf("create Thread Error");
 //                    }
-                    if (g_loginWnd)
+                    if (g_loginWnd != NULL)
                     {
                         //g_loginWnd->m_waitstuDialog->WaitStuShow();
                         g_loginWnd->m_waitstu->waitstushow();
@@ -88,7 +88,7 @@ void msg_respose(ReportMsg msg)
                 g_pLog->WriteLog(0,"zhaosenhua, msg_respose waitstu exit. \n");
                 g_bshowwaitstu = false;
                 //PIPE_WAIT("1");
-                if (g_loginWnd)
+                if (g_loginWnd != NULL)
                 {
                     //g_loginWnd->m_waitstuDialog->WaitStuHide();
                     g_loginWnd->m_waitstu->waitstuhide();

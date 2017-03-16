@@ -52,6 +52,10 @@ extern bool    g_exitMonitoramq;
 extern pthread_t g_monitoramq;
 extern int ping_net(char *ip);
 extern long __GetTime();
+extern void InitMyMutex();
+extern void MyMutex_lock();
+extern void MyMutex_unlock();
+extern void MyMutex_destroy();
 #define PIPE_WAIT(x) ({msg_send(x);})
 #endif // GLOBAL_H
 

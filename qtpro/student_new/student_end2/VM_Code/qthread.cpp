@@ -53,7 +53,7 @@ void qthreadPing::run()
     FILE *pp = popen(szcmd, "r");
     if (pp)
     {
-        char tmp[1024] = {0};
+        char tmp[512] = {0};
         while (fgets(tmp, sizeof(tmp), pp) != NULL)
         {
             if (tmp[strlen(tmp) -1] == '\n')

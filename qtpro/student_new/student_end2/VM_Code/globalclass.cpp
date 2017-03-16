@@ -23,6 +23,7 @@ myHttp *g_pMyHttp = NULL;
 char g_strServerIP[25];
 char cMainExitFlag;
 LoadingFrame *g_LoadingFrame;
+pthread_mutex_t  g_mymutex;
 
 ////////////////////////////////
 //msg queue
@@ -122,4 +123,22 @@ long __GetTime()
     //long lTime = ((long)iTime.tv_sec) * 1000000 + (long)iTime.tv_usec;
     long lTime = ((long)iTime.tv_sec) * 1000;
     return lTime;
+}
+
+//mutex
+void InitMyMutex()
+{
+    pthread_mutex_init(&g_mymutex, NULL);
+}
+void MyMutex_lock()
+{
+    pthread_mutex_lock(&g_mymutex);
+}
+void MyMutex_unlock()
+{
+    pthread_mutex_unlock(&g_mymutex);
+}
+void MyMutex_destroy()
+{
+    pthread_mutex_destroy(&g_mymutex);
 }

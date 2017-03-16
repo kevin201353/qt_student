@@ -37,5 +37,5 @@ void waitstu2::waitstushow()
 
 void waitstu2::waitstuhide()
 {
-    hide();
+    this->hide();
 }
