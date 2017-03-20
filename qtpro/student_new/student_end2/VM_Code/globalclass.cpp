@@ -24,6 +24,7 @@ char g_strServerIP[25];
 char cMainExitFlag;
 LoadingFrame *g_LoadingFrame;
 pthread_mutex_t  g_mymutex;
+bool   g_reconntvm;
 
 ////////////////////////////////
 //msg queue
@@ -141,4 +142,20 @@ void MyMutex_unlock()
 void MyMutex_destroy()
 {
     pthread_mutex_destroy(&g_mymutex);
+}
+
+bool bMyGetConnectVm()
+{
+    bool bRet = false;
+    MyMutex_lock();
+    bRet = g_reconntvm;
+    MyMutex_unlock();
+    return bRet;
+}
+
+void MySetConnectVm(bool bval)
+{
+    MyMutex_lock();
+    g_reconntvm = bval;
+    MyMutex_unlock();
 }

@@ -56,6 +56,8 @@ extern void InitMyMutex();
 extern void MyMutex_lock();
 extern void MyMutex_unlock();
 extern void MyMutex_destroy();
+extern bool bMyGetConnectVm();
+extern void MySetConnectVm(bool bval);
 #define PIPE_WAIT(x) ({msg_send(x);})
 #endif // GLOBAL_H
 

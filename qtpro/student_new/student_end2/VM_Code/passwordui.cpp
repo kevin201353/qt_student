@@ -32,6 +32,7 @@ PasswordUI::PasswordUI(QWidget *parent) :
     ui->btn_OK->setText("确定");
     ui->btn_Cancel->setText("取消");
     ui->lineEdit_pass->setText("");
+    ui->lineEdit_pass->setEchoMode(QLineEdit::Password);
     this->hide();
 }
 

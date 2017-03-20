@@ -243,15 +243,6 @@ void ActiveMQConsumer::onMessage( const Message* message )
            // message->acknowledge();
         }
         g_pLog->WriteLog(0,"Message #%d Received: %s\n", count, text.c_str());
-//        g_pProcess->m_data.s_IsArray = false;
-//        memset(g_pProcess->m_data.Data,0,DATABUFLEN);
-//        strncpy(g_pProcess->m_data.Data,text.c_str(),DATABUFLEN);
-//        g_pProcess->m_data.s_IsArray = true;
-        //test
-        //char sztmp[1024] = {0};
-        //sprintf(sztmp, "Message #%d Received: %s\n", count, text.c_str());
-        //qDebug() << QString(sztmp);
-        //test end
         QueMsg msg;
         strcpy(msg.Data, text.c_str());
         g_MsgQueue.AddQueMsg(msg);

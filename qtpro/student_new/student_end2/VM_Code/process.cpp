@@ -66,8 +66,9 @@ static void *thrd_exec(void *param)
 //    }
 //    pclose(fp);
 //    MyMutex_lock();
+    MySetConnectVm(true);
     system(g_szCmd);
- //   MyMutex_unlock();
+//    MyMutex_unlock();
  //   g_pLog->WriteLog(0,"zhaosenhua thrd_exec spicy running success.");
     return NULL;
 }
@@ -532,6 +533,7 @@ int process::ProcessThreadNew()
         if (strcmp(ActionBuf,"classbegin") == 0)
         {
             //show wait_stu
+            MySetConnectVm(false);
             ReportMsg reportmsg;
             reportmsg.action = USER_WAITINGDLG_SHOW;
             call_msg_back(msg_respose, reportmsg);
@@ -539,6 +541,7 @@ int process::ProcessThreadNew()
         if (strcmp(ActionBuf,"display") == 0)
         {
             //connect vm
+            MySetConnectVm(false);
             char sz_host[100] = {0};
             char sz_port[50] = {0};
             char sz_vmid[100] = {0};
@@ -588,12 +591,14 @@ int process::ProcessThreadNew()
             }
             if (nRet == 0)
             {
+                 MySetConnectVm(false);
                  g_pLog->WriteLog(0,"sh msg display failed.");
             }
         }
         if (strcmp(ActionBuf,"classover") == 0)
         {
             //close wait_stu
+            MySetConnectVm(false);
             qDebug("classover enter.");
             memset(MessageBuf,0,1024);
             ReportMsg reportmsg;
@@ -614,11 +619,14 @@ int process::ProcessThreadNew()
         }
         if (strcmp(ActionBuf,"start_demonstrate") == 0)
         {
+            MySetConnectVm(false);
+            ReportMsg reportmsg;
+            reportmsg.action = USER_WAITINGDLG_EXIT;
+            call_msg_back(msg_respose, reportmsg);
             qDebug("start_demonstrate enter.");
             memset(MessageBuf,0,1024);
             pthread_t pid;
             m_pWidget->m_pGroupWigdet->setEnabled(false);
-            ReportMsg reportmsg;
             reportmsg.action = USER_WAITINGDLG_SHOW;
             call_msg_back(msg_respose, reportmsg);
             char szCommand[500] = {0};
@@ -643,6 +651,7 @@ int process::ProcessThreadNew()
         }
         if (strcmp(ActionBuf,"stop_demonstrate") == 0)
         {
+            MySetConnectVm(false);
             memset(MessageBuf,0,1024);
             qDebug("stop_demonstrate enter.");
             system("sudo /usr/local/shencloud/enable_input.sh &");
@@ -661,6 +670,7 @@ int process::ProcessThreadNew()
         }
         if (strcmp(ActionBuf,"freeStudy") == 0)
         {
+            MySetConnectVm(false);
             myHttp http;
             http.SetUrlIP(g_strServerIP);
             system("sudo kill -9 $(pgrep spicy)");
