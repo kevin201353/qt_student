@@ -26,9 +26,9 @@ public:
     void MoveRigth();
     int m_iClassNum;
 private:
+    ClassNameAndChoose m_ClassNameArray[MAXCLASS];
     int m_iClassLabelNum;
     int m_iInode;
-    ClassNameAndChoose m_ClassNameArray[MAXCLASS];
     ClassMould *m_pClassLabel[MAXCLASS];
     void ClearOtherChoose(int inode);
     int GetChooseInode();

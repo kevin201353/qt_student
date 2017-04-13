@@ -7,16 +7,17 @@
 #include <QFont>
 #include <QPainter>
 #include <QTimer>
+#include "global.h"
 
-#define DIALOGPNG       "/usr/local/shencloud/image/DialogBack.png"
+#define DIALOGPNG       "/usr/local/shencloud/image1/DialogBack.png"
 
-#define DIALOGOKPNG     "QPushButton{border-image: url(/usr/local/shencloud/image/DialogOK.png);}"\
-                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image/DialogOKPress.png);}"\
-                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image/DialogOK.png)}"
+#define DIALOGOKPNG     "QPushButton{border-image: url(/usr/local/shencloud/image1/DialogOK.png);}"\
+                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/DialogOKPress.png);}"\
+                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/DialogOK.png)}"
 
-#define DIALOGCANCELPNG "QPushButton{border-image: url(/usr/local/shencloud/image/DialogCancel.png);}"\
-                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image/DialogCancelPress.png);}"\
-                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image/DialogCancel.png)}"
+#define DIALOGCANCELPNG "QPushButton{border-image: url(/usr/local/shencloud/image1/DialogCancel.png);}"\
+                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/DialogCancelPress.png);}"\
+                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/DialogCancel.png)}"
 
 #define  SHUTDOWN   0
 #define  PASSFAILD  3
@@ -59,6 +60,7 @@ private:
     bool     m_show;
 protected:
     void paintEvent(QPaintEvent *event);
+    void widget_resize();
 };
 
 #endif // MYDIALOG_H

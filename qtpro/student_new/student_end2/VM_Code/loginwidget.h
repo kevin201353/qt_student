@@ -28,37 +28,38 @@
 #include "passwordui.h"
 
 #define LOGOPNG      "/usr/local/shencloud/image1/Logo_Student.png"
+#define LOGOPNG2     "/usr/local/shencloud/image1/LeTOS_03.png"
 #define DESKTOPMAP  "/usr/local/shencloud/image1/Top_Student1.png"
-//#define USRLOGO      "/usr/local/shencloud/pengjian/QtProject/CloudClassRoom/image/Username.png"
-//#define PASSWDLOGO  "/usr/local/shencloud/pengjian/QtProject/CloudClassRoom/image/Userpasswd.png"
+//#define USRLOGO      "/usr/local/shencloud/pengjian/QtProject/CloudClassRoom/image1/Username.png"
+//#define PASSWDLOGO  "/usr/local/shencloud/pengjian/QtProject/CloudClassRoom/image1/Userpasswd.png"
 
-#define SETLOGO         "QPushButton{border-image: url(/usr/local/shencloud/image/Set.png);}"\
-                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image/SetPress.png);}"\
-                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image/Set.png)}"
+#define SETLOGO         "QPushButton{border-image: url(/usr/local/shencloud/image1/Set.png);}"\
+                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/SetPress.png);}"\
+                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/Set.png)}"
 
-#define INFORMATIONLOGO     "QPushButton{border-image: url(/usr/local/shencloud/image/Information.png);}"\
-                            "QPushButton:hover{border-image: url(/usr/local/shencloud/image/InformationPress.png);}"\
-                            "QPushButton:pressed{border-image: url(/usr/local/shencloud/image/Information.png)}"
+#define INFORMATIONLOGO     "QPushButton{border-image: url(/usr/local/shencloud/image1/Information.png);}"\
+                            "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/InformationPress.png);}"\
+                            "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/Information.png)}"
 
-#define SERVERMANLOGO   "QPushButton{border-image: url(/usr/local/shencloud/image/ServerMan.png);}"\
-                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image/ServerManPress.png);}"\
-                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image/ServerMan.png)}"
+#define SERVERMANLOGO   "QPushButton{border-image: url(/usr/local/shencloud/image1/ServerMan.png);}"\
+                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/ServerManPress.png);}"\
+                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/ServerMan.png)}"
 
-#define LOGINLOGO       "QPushButton{border-image: url(/usr/local/shencloud/image/Login.png);}"\
-                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image/LoginPress.png);}"\
-                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image/Login.png)}"
+#define LOGINLOGO       "QPushButton{border-image: url(/usr/local/shencloud/image1/Login.png);}"\
+                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/LoginPress.png);}"\
+                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/Login.png)}"
 
-#define SHUTDOWNLOGO    "QPushButton{border-image: url(/usr/local/shencloud/image/Shutdown.png);}"\
-                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image/ShutdownPress.png);}"\
-                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image/Shutdown.png)}"
+#define SHUTDOWNLOGO    "QPushButton{border-image: url(/usr/local/shencloud/image1/Shutdown.png);}"\
+                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/ShutdownPress.png);}"\
+                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/Shutdown.png)}"
 
-#define RIGHTPNG        "QPushButton{border-image: url(/usr/local/shencloud/image/Right.png);}"\
-                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image/RightPress.png);}"\
-                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image/Right.png)}"
+#define RIGHTPNG        "QPushButton{border-image: url(/usr/local/shencloud/image1/Right.png);}"\
+                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/RightPress.png);}"\
+                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/Right.png)}"
 
-#define LEFTPNG         "QPushButton{border-image: url(/usr/local/shencloud/image/Left.png);}" \
-                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image/LeftPress.png);}" \
-                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image/Left.png)}"
+#define LEFTPNG         "QPushButton{border-image: url(/usr/local/shencloud/image1/Left.png);}" \
+                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/LeftPress.png);}" \
+                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/Left.png)}"
 
 #define ENTER           "QPushButton{border-image: url(/usr/local/shencloud/image1/Enter.png);}" \
                         "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/EnterPress.png);}" \
@@ -76,7 +77,7 @@ public:
     explicit LoginWidget(QWidget *parent = 0);
     ~LoginWidget();
     ClassNameConfig *m_pClassNameConfig;
-    QGroupBox   *m_pGroupWigdet;
+    //Group   *m_pGroupWigdet;
     SetForm     *m_pSetForm;
     MyDialog    *m_pMyDialog;
     //WaitstuDialog  *m_waitstuDialog;
@@ -85,8 +86,8 @@ public:
     void SetChecked();
     void createPipe();
     void initConfig();
+    void SetEnable(bool flag);
 private slots:
-
     void OnTimeOut();
     void on_SetpushButton_clicked();
 
@@ -121,7 +122,7 @@ private:
     QPushButton *m_pLeftPushButton;
     QPushButton *m_pRightPushButton;
     QPushButton *m_pEnterPushButton;
-
+    QLabel      *m_pLogoQLable2;
     ClassMould *m_pClassName1;
     ClassMould *m_pClassName2;
     ClassMould *m_pClassName3;

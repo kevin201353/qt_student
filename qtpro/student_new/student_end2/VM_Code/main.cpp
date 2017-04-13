@@ -3,6 +3,7 @@
 #include "ryanConfig.h"
 #include "include.h"
 #include "waitstu2.h"
+#include "stwidget.h"
 
 extern void *WhileFun(void *param);
 int main(int argc, char *argv[])
@@ -23,6 +24,11 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     LoginWidget w;
     w.showFullScreen();
-    w.show();
+    QFont  font;
+    font.setFamily("Ms Shell Dlg 2");
+    a.setFont(font);
+    //w.show();
+    //stwidget st;
+    //st.show();
     return a.exec();
 }

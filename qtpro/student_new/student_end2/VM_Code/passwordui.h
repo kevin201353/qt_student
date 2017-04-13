@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QString>
 #include <QDialog>
+#include <QMouseEvent>
+#include <QFont>
 
 namespace Ui {
 class PasswordUI;
@@ -18,16 +20,21 @@ public:
     ~PasswordUI();
 public:
     static bool isAdjustPass();
+    void setpasstext(QString szpass);
 signals:
     void ShowPassUI();
 private slots:
     void OnOk();
     void OnCancel();
     void exit_widget();
+protected:
+    void keyPressEvent(QKeyEvent  *event);
+    void widget_resize();
 private:
     Ui::PasswordUI *ui;
     QString   m_strPassword;
     static bool   m_isAdjust;
     QDialog*     m_tmpDialog;
+    QFont           m_Font;
 };
 #endif // PASSWORDUI_H

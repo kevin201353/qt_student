@@ -4,7 +4,7 @@
 #include <QFrame>
 #include <QLabel>
 #include <QMovie>
-#define GIFFILE  "/usr/local/shencloud/image/Loaging.gif"
+#define GIFFILE  "/usr/local/shencloud/image1/Loaging.gif"
 namespace Ui {
 class LoadingFrame;
 }

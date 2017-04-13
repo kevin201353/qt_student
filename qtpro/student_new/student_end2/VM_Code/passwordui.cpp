@@ -4,8 +4,9 @@
 #include <QByteArray>
 #include <QDesktopWidget>
 #include "mydialog.h"
+#include "global.h"
 
-#define SH_PASS_CONFIG   "admin"
+#define SH_PASS_CONFIG   "@1en0v0"
 
 bool PasswordUI::m_isAdjust = false;
 PasswordUI::PasswordUI(QWidget *parent) :
@@ -15,11 +16,13 @@ PasswordUI::PasswordUI(QWidget *parent) :
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
     this->setWindowModality(Qt::ApplicationModal);
-    ui->frame_title->setStyleSheet("background-color: rgb(0,123,214)");
+    //ui->frame_title->setStyleSheet("background-color: rgb(0,123,214)");
+    ui->frame_title->setStyleSheet("background-color: rgb(255,153,19)");
+    ui->btn_OK->setStyleSheet("background-color:rgb(255,153,19);color:rgb(255,255,255)");
+    ui->btn_Cancel->setStyleSheet("background-color:rgb(255,153,19);color:rgb(255,255,255)");
     connect(ui->btn_exit, SIGNAL(clicked(bool)), this, SLOT(exit_widget()));
     connect(ui->btn_OK, SIGNAL(clicked(bool)), this, SLOT(OnOk()));
     connect(ui->btn_Cancel, SIGNAL(clicked(bool)), this, SLOT(OnCancel()));
-    this->move(QApplication::desktop()->width()/2 - width()/2, QApplication::desktop()->height()/2 - height()/2);
     QByteArray ba, bb;
     QString pwd = SH_PASS_CONFIG;
     QCryptographicHash md(QCryptographicHash::Md5);
@@ -28,11 +31,16 @@ PasswordUI::PasswordUI(QWidget *parent) :
     bb = md.result();
     m_strPassword.append(bb.toHex());
     m_isAdjust = false;
-    ui->label_pass->setText("输入密码：");
+    ui->label_pass->setText("输入密码");
+    ui->label_title->setText("输入密码");
+    m_Font.setPixelSize(15);
+    ui->btn_OK->setFont(m_Font);
     ui->btn_OK->setText("确定");
+    ui->btn_Cancel->setFont(m_Font);
     ui->btn_Cancel->setText("取消");
     ui->lineEdit_pass->setText("");
     ui->lineEdit_pass->setEchoMode(QLineEdit::Password);
+    widget_resize();
     this->hide();
 }
 
@@ -59,6 +67,7 @@ void PasswordUI::OnOk()
         emit ShowPassUI();
     }else
     {
+        ui->lineEdit_pass->setText("");
         MyDialog *pshutdlg = new MyDialog();
         pshutdlg->setText("密码错误！");
         pshutdlg->setFlag(PASSFAILD);
@@ -79,4 +88,35 @@ void PasswordUI::exit_widget()
 bool PasswordUI::isAdjustPass()
 {
     return m_isAdjust;
+}
+
+void PasswordUI::setpasstext(QString szpass)
+{
+    ui->lineEdit_pass->setText(szpass);
+}
+
+void PasswordUI::keyPressEvent(QKeyEvent  *event)
+{
+    if ( event->key() == Qt::Key_Return )
+    {
+        OnOk();
+    }
+}
+
+void PasswordUI::widget_resize()
+{
+    int scr_width = QApplication::desktop()->width();
+    int scr_height = QApplication::desktop()->height();
+    float factor_x = (float)scr_width/g_scr_old_width;
+    float factor_y = (float)scr_height/g_scr_old_height;
+    my_resize(this, factor_x, factor_y);
+    my_resize(ui->frame_title, factor_x, factor_y);
+    my_resize(ui->label_title, factor_x, factor_y);
+    my_resize(ui->label_pass, factor_x, factor_y);
+    my_resize(ui->lineEdit_pass, factor_x, factor_y);
+    my_resize(ui->btn_Cancel, factor_x, factor_y);
+    my_resize(ui->btn_exit, factor_x, factor_y);
+    my_resize(ui->btn_OK, factor_x, factor_y);
+    ui->label_pass->setScaledContents(true);
+    this->move(scr_width/2 - width()/2, scr_height/2 - height()/2);
 }

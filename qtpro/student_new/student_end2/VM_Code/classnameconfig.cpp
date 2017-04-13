@@ -24,7 +24,8 @@ void ClassNameConfig::AddLabel(ClassMould *label)
 {
     if(label)
     {
-        m_pClassLabel[m_iClassLabelNum++] = label;
+        if (m_iClassLabelNum < 3)
+            m_pClassLabel[m_iClassLabelNum++] = label;
     }
 }
 void ClassNameConfig::AddInode()

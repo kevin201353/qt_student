@@ -12,6 +12,7 @@ qthread::~qthread()
     m_stop = true;
 }
 
+int ncount = 0;
 void qthread::run()
 {
     while(!m_stop)
@@ -19,7 +20,12 @@ void qthread::run()
         if (!g_bSetupAmq)
         {
             qDebug() << "start show netoff dailog.\n";
-            emit NoticeShow();
+            if (ncount > 3)
+            {
+                ncount = 0;
+                emit NoticeShow();
+            }
+            ncount++;
         }else
         {
             emit NoticeHide();
@@ -48,7 +54,10 @@ QString  g_strPing;
 void qthreadPing::run()
 {
     char szcmd[100] = {0};
-    strcpy(szcmd, m_szPing.toStdString().c_str());
+    QString strping;
+    strping = "ping ";
+    strping += m_szPing;
+    strcpy(szcmd, strping.toStdString().c_str());
     //strcat(szcmd, " -c 10");
     FILE *pp = popen(szcmd, "r");
     if (pp)

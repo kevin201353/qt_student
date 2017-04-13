@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <QWidget>
 
 #define USER_WAITINGDLG_SHOW   100
 #define USER_WAITINGDLG_EXIT   101
@@ -58,6 +59,9 @@ extern void MyMutex_unlock();
 extern void MyMutex_destroy();
 extern bool bMyGetConnectVm();
 extern void MySetConnectVm(bool bval);
+extern float g_scr_old_width;
+extern float g_scr_old_height;
+extern int my_resize(QWidget* widget, float factorX, float factorY);
 #define PIPE_WAIT(x) ({msg_send(x);})
 #endif // GLOBAL_H
 

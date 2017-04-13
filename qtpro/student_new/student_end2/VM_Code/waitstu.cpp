@@ -32,6 +32,7 @@ waitstu::~waitstu()
 
 void waitstu::paintEvent(QPaintEvent *event)
 {
+    //QPixmap pixmap(DESKTOPMAP);
     QPainter painter(this);
    // painter.drawPixmap(0,0,width(),height(),QPixmap(DESKTOPMAP));
 }

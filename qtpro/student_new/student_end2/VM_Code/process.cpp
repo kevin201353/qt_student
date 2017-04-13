@@ -174,7 +174,7 @@ int process::ProcessThread()
                 if(ReturnCode)
                 {
                     iConnectNum = 0;
-                    m_pWidget->m_pGroupWigdet->setEnabled(false);
+                    m_pWidget->SetEnable(false);
                     g_Pproduce->send(MessageBuf,strlen(MessageBuf));
                     g_pJson->ReadJson_v(&Port,"data","port");
                     g_pJson->ReadJson_v(IP,"data","host");
@@ -281,7 +281,7 @@ int process::ProcessThread()
                 memset(JsonBuf,0,1024);
                 g_Pproduce->send(MessageBuf,strlen(MessageBuf));
                 //xiake
-                m_pWidget->m_pGroupWigdet->setEnabled(false);
+                m_pWidget->SetEnable(false);
                 system("sudo kill -9 $(pgrep spicy)");
                 //system("killall -9 spicy");
                 printf("\nover\n");
@@ -336,7 +336,7 @@ int process::ProcessThread()
                     {
                         m_pWidget->m_pClassNameConfig->AddClass(ClassName[i],ClassID[i]);
                     }
-                    m_pWidget->m_pGroupWigdet->setEnabled(true);
+                    m_pWidget->SetEnable(true);
                     m_pWidget->m_pClassNameConfig->ChooseOne();
                     m_pWidget->m_pClassNameConfig->SetLabelName();
                 }
@@ -549,7 +549,7 @@ int process::ProcessThreadNew()
             g_pJson->ReadJson_v(sz_host, "data", "host");
             g_pJson->ReadJson_v(sz_port, "data", "port");
             g_pJson->ReadJson_v(sz_vmid, "data", "vmId");
-            m_pWidget->m_pGroupWigdet->setEnabled(false);
+            m_pWidget->SetEnable(false);
             system("rm -f /tmp/data_*");
             qDebug("begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
             g_pLog->WriteLog(0,"begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
@@ -601,10 +601,12 @@ int process::ProcessThreadNew()
             MySetConnectVm(false);
             qDebug("classover enter.");
             memset(MessageBuf,0,1024);
+            /*
             ReportMsg reportmsg;
             reportmsg.action = USER_WAITINGDLG_EXIT;
             call_msg_back(msg_respose, reportmsg);
-            m_pWidget->m_pGroupWigdet->setEnabled(false);
+            */
+            m_pWidget->SetEnable(false);
             system("sudo kill -9 $(pgrep spicy)");
             system("sudo kill -9 $(pgrep eclass_client)");
             int nRet = detect_process("spicy");
@@ -620,15 +622,15 @@ int process::ProcessThreadNew()
         if (strcmp(ActionBuf,"start_demonstrate") == 0)
         {
             MySetConnectVm(false);
+            /*
             ReportMsg reportmsg;
-            reportmsg.action = USER_WAITINGDLG_EXIT;
+            reportmsg.action = USER_WAITINGDLG_SHOW;
             call_msg_back(msg_respose, reportmsg);
+            */
             qDebug("start_demonstrate enter.");
             memset(MessageBuf,0,1024);
             pthread_t pid;
-            m_pWidget->m_pGroupWigdet->setEnabled(false);
-            reportmsg.action = USER_WAITINGDLG_SHOW;
-            call_msg_back(msg_respose, reportmsg);
+            m_pWidget->SetEnable(false);
             char szCommand[500] = {0};
             g_pJson->ReadJson_v(szCommand, "data", "command");
             qDebug("start_demonstrate command : %s.\n", szCommand);
@@ -653,6 +655,11 @@ int process::ProcessThreadNew()
         {
             MySetConnectVm(false);
             memset(MessageBuf,0,1024);
+            /*
+            ReportMsg reportmsg;
+            reportmsg.action = USER_WAITINGDLG_EXIT;
+            call_msg_back(msg_respose, reportmsg);
+            */
             qDebug("stop_demonstrate enter.");
             system("sudo /usr/local/shencloud/enable_input.sh &");
             pthread_t pid;
@@ -671,6 +678,10 @@ int process::ProcessThreadNew()
         if (strcmp(ActionBuf,"freeStudy") == 0)
         {
             MySetConnectVm(false);
+            ReportMsg reportmsg;
+            reportmsg.action = USER_WAITINGDLG_EXIT;
+            call_msg_back(msg_respose, reportmsg);
+            m_pWidget->show();
             myHttp http;
             http.SetUrlIP(g_strServerIP);
             system("sudo kill -9 $(pgrep spicy)");
@@ -705,7 +716,7 @@ int process::ProcessThreadNew()
                 {
                     m_pWidget->m_pClassNameConfig->AddClass(ClassName[i],ClassID[i]);
                 }
-                m_pWidget->m_pGroupWigdet->setEnabled(true);
+                m_pWidget->SetEnable(true);
                 m_pWidget->m_pClassNameConfig->ChooseOne();
                 m_pWidget->m_pClassNameConfig->SetLabelName();
             }
@@ -752,7 +763,7 @@ int process::connect_vm(char *ip, char *port, char *vmid)
     int nRet = detect_process("spicy");
     if (nRet == 1)
     {
-        //system("sudo kill -9 $(pgrep spicy)");
+        system("sudo kill -9 $(pgrep spicy)");
         return 2;
     }
     sprintf(g_szCmd, "sudo spicy.sh -h %s -p %s -f > %s", ip, port, "/usr/local/shencloud/log/spicy.log");

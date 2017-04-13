@@ -2,6 +2,8 @@
 #define WAITSTU2_H
 
 #include <QWidget>
+#include <QMovie>
+#include <QTimer>
 
 namespace Ui {
 class waitstu2;
@@ -16,8 +18,27 @@ public:
     ~waitstu2();
     void waitstushow();
     void waitstuhide();
+    void widget_resize();
+    int width() const {
+        return m_width;
+    };
+    int height() const {
+        return m_height;
+    };
+protected:
+    void paintEvent(QPaintEvent *event);
+    void keyPressEvent(QKeyEvent  *event);
+signals:
+    void wait_showPassUI();
+    void wait_shutdown();
+private slots:
+    void On_Setting();
+    void On_Shutdown();
 private:
     Ui::waitstu2 *ui;
+    QMovie  *m_pMovie;
+    int     m_width;
+    int     m_height;
 };
 
 #endif // WAITSTU2_H

@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include "include.h"
 #include "global.h"
+#include <QDesktopWidget>
 
 extern NetConfig   *g_pNetConfig;
 extern char g_strRoomNum[100];
@@ -44,8 +45,9 @@ SetForm::SetForm(QWidget *parent) :
     //this->setWindowFlags(this->windowFlags()& ~Qt::WindowMinMaxButtonsHint);
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     this->setWindowModality(Qt::ApplicationModal);
-    this->setFixedSize(this->width(), this->height());
+    //this->setFixedSize(this->width(), this->height());
     this->setWindowTitle("设置");
+    //m_Font.setFamily("微软雅黑");
     m_Font.setPixelSize(15);
     m_pSavePushButton = ui->SavepushButton;
     m_pCancelPushButton = ui->CancelpushButton;
@@ -57,10 +59,12 @@ SetForm::SetForm(QWidget *parent) :
 
     m_pSavePushButton->setFont(m_Font);
     m_pSavePushButton->setText("保存");
-    m_pSavePushButton->setStyleSheet("background-color:rgb(0,123,214);color:rgb(255,255,255)");
+    //m_pSavePushButton->setStyleSheet("background-color:rgb(0,123,214);color:rgb(255,255,255)");
+    m_pSavePushButton->setStyleSheet("background-color:rgb(255,153,19);color:rgb(255,255,255)");
 
     m_pCancelPushButton->setFont(m_Font);
-    m_pCancelPushButton->setStyleSheet("background-color:rgb(0,123,214);color:rgb(255,255,255)");
+    //m_pCancelPushButton->setStyleSheet("background-color:rgb(0,123,214);color:rgb(255,255,255)");
+    m_pCancelPushButton->setStyleSheet("background-color:rgb(255,153,19);color:rgb(255,255,255)");
     m_pCancelPushButton->setText("取消");
 
     m_IPGroupBox = ui->IPgroupBox;
@@ -107,9 +111,11 @@ SetForm::SetForm(QWidget *parent) :
     ui->RoomNumlabel->setText("教室号");
     //m_pSeatNumLabel->setFont(m_Font);
     ui->SeatNumlabel->setText("座位号");
-    ui->title_bar->setStyleSheet("background-color: rgb(0,123,214)");
+    //ui->title_bar->setStyleSheet("background-color: rgb(0,123,214)");
+    ui->title_bar->setStyleSheet("background-color: rgb(255,153,19)");
     connect(ui->btnExit, SIGNAL(clicked(bool)), this, SLOT(exit_widget()));
-    connect(ui->lineEdit_Ping, SIGNAL(returnPressed()), this, SLOT(on_returnPressed()));
+    //connect(ui->lineEdit_Ping, SIGNAL(returnPressed()), this, SLOT(on_returnPressed()));
+    connect(ui->btn_network, SIGNAL(clicked(bool)), this, SLOT(on_returnPressed()));
     ui->Tiplabel22->setText("");
 //    m_pMyDialog = NULL;
 //    m_pMyDialog = new MyDialog(this);
@@ -118,9 +124,22 @@ SetForm::SetForm(QWidget *parent) :
     m_pqthread = NULL;
     m_pqthread = new qthreadPing();
     connect(m_pqthread, SIGNAL(NoticeMsg()), this, SLOT(update()));
-    ui->label_Tip->setText("输入ping ip地址，然后按回车键 如：ping 127.0.0.1  结束: ctrl + c");
+    //ui->label_Tip->setText("输入ping ip地址，然后按回车键 如：ping 127.0.0.1  结束: ctrl + c");
+    ui->label_Tip->setText("结束: ctrl + c");
     ui->SeatlineEdit->setText(g_strSeatNum);
     ui->listWidget_Ping->clear();
+    ui->btn_network->setText("检测");
+    ui->btn_network->setStyleSheet("background-color:rgb(255,153,19);color:rgb(255,255,255)");
+    ui->label_title->setText("学生终端配置");
+
+#if 1
+    m_pRoomNumcomboBox->setEnabled(false);
+    m_pRoomNumcomboBox->setVisible(false);
+    ui->RoomNumlabel->setEnabled(false);
+    ui->RoomNumlabel->setVisible(false);
+#endif
+
+    widget_resize();
 }
 
 SetForm::~SetForm()
@@ -232,6 +251,30 @@ void SetForm::on_ManualSetDNSradioButton_clicked(bool checked)
 void *SystemThread(void *param)
 {
     SetForm *pTemp = (SetForm *)param;
+//    char SystemCmd[1024];
+//    memset(SystemCmd,0,1024);
+//    sprintf(SystemCmd,"sudo ifdown %s",ETH0);
+//    system(SystemCmd);
+//    memset(SystemCmd,0,1024);
+//    sprintf(SystemCmd,"sudo ifup %s",ETH0);
+//    system(SystemCmd);
+//    g_pMyHttp->SetUrlIP(pTemp->m_strServerIP);
+//    memset(g_strServerIP,0,25);
+//    strncpy(g_strServerIP,pTemp->m_strServerIP.toStdString().c_str(),25);
+//    WriteConfigString(CONFIGNAME,"ROOM","ServiceIP",g_strServerIP);
+//    pTemp->SetLoadingFram(false);
+//    //pTemp->SetSalveEnable(true);
+//    pTemp->setEnabled(true);
+//    if (pTemp->m_bSetRoomfail)
+//        pTemp->m_tiplabel->setText("教室名称或座位号设置失败!");
+//    else
+//        pTemp->m_tiplabel->setText("");
+//    pTemp->close();
+
+    /*****************************************/
+    /***************************************************/
+         //add zsh
+    /****************************************************/
     char SystemCmd[1024];
     memset(SystemCmd,0,1024);
     sprintf(SystemCmd,"sudo ifdown %s",ETH0);
@@ -239,19 +282,14 @@ void *SystemThread(void *param)
     memset(SystemCmd,0,1024);
     sprintf(SystemCmd,"sudo ifup %s",ETH0);
     system(SystemCmd);
-
-    g_pMyHttp->SetUrlIP(pTemp->m_strServerIP);
-    memset(g_strServerIP,0,25);
-    strncpy(g_strServerIP,pTemp->m_strServerIP.toStdString().c_str(),25);
-    WriteConfigString(CONFIGNAME,"ROOM","ServiceIP",g_strServerIP);
+//    if (m_bSetRoomfail)
+//        m_tiplabel->setText("教室名称或座位号设置失败!");
+//    else
+//       m_tiplabel->setText("");
+    pTemp->saveRoomSeat();
     pTemp->SetLoadingFram(false);
-    //pTemp->SetSalveEnable(true);
     pTemp->setEnabled(true);
-    if (pTemp->m_bSetRoomfail)
-        pTemp->m_tiplabel->setText("教室名称或座位号设置失败!");
-    else
-        pTemp->m_tiplabel->setText("");
-
+    pTemp->close();
 }
 void SetForm::on_SavepushButton_clicked()
 {
@@ -271,7 +309,6 @@ void SetForm::on_SavepushButton_clicked()
     g_pNetConfig->WriteFile();
     m_pLoagingFrame->show();
     this->setEnabled(false);
-    saveRoomSeat();
     if(pthread_create(&pid,NULL,SystemThread,this))
     {
         printf("Create Thread Error!\n");
@@ -510,38 +547,55 @@ void SetForm::exit_widget()
 
 void SetForm::saveRoomSeat()
 {
-    memset(g_strRoomNum,0,100);
-    memset(g_strSeatNum,0,20);
-    strncpy(g_strRoomNum,m_pRoomNumcomboBox->currentText().toStdString().c_str(),100);
-    strncpy(g_strSeatNum,m_pSeatLineEdit->text().toStdString().c_str(),20);
-    g_pLog->WriteLog(0,"Set Room Num:%s Sear Num:%s",g_strRoomNum,g_strSeatNum);
-    char TempBuf[1024];
-    char JsonBuf[10240];
-    bool Recode = false;
-    memset(JsonBuf,0,10240);
-    memset(TempBuf,0,1024);
-    sprintf(TempBuf,"/service/aps/config?id=%s&roomName=%s&seat=%s&reboot=false", g_strTerminalID, g_strRoomNum, g_strSeatNum);
-    g_pLog->WriteLog(0,"UP SeatNum RoomNum:%s",TempBuf);
-    qDebug("TempBuf:%s",TempBuf);
-    g_pMyHttp->Get(TempBuf);
-    g_pMyHttp->GetData(JsonBuf);
-    qDebug("UP SeatNum RoomNum%s\n",JsonBuf);
-    g_pLog->WriteLog(0,"Recv Json:%s",JsonBuf);
-    g_pJson->Parse(JsonBuf);
-    g_pJson->ReadJson(&Recode,"success");
-    if(Recode)
+    QString strMqIP = m_pServerIPLineEdit->text();
+    memset(g_strServerIP, 0, sizeof(g_strServerIP));
+    m_strServerIP = strMqIP;
+    strncpy(g_strServerIP, m_strServerIP.toStdString().c_str(),25);
+    if (m_pServerIPLineEdit->text() != g_strServerIP)
     {
+        //change server ip
         WriteConfigString(CONFIGNAME,"ROOM","ClassName",g_strRoomNum);
         WriteConfigString(CONFIGNAME,"ROOM","SeatName",g_strSeatNum);
-        m_bSetRoomfail = false;
-    }
-    else
+        WriteConfigString(CONFIGNAME,"ROOM","ServiceIP",g_strServerIP);
+        system("sudo reboot");
+    }else
     {
-        //set failed
-//        m_pMyDialog->setFlag(1);
-//        m_pMyDialog->setText("设置失败!");
-//        m_pMyDialog->show();
-        m_bSetRoomfail = true;
+        WriteConfigString(CONFIGNAME,"ROOM","ServiceIP",g_strServerIP);
+        //memset(g_strRoomNum,0,100);
+        memset(g_strSeatNum,0,20);
+        //strncpy(g_strRoomNum,m_pRoomNumcomboBox->currentText().toStdString().c_str(),100);
+        strncpy(g_strSeatNum,m_pSeatLineEdit->text().toStdString().c_str(),20);
+        g_pLog->WriteLog(0,"Set Room Num:%s Sear Num:%s",g_strRoomNum,g_strSeatNum);
+        char TempBuf[1024];
+        char JsonBuf[10240];
+        bool Recode = false;
+        memset(JsonBuf,0,10240);
+        memset(TempBuf,0,1024);
+        sprintf(TempBuf,"/service/aps/config?id=%s&roomName=%s&seat=%s&reboot=false&sync=false", g_strTerminalID, g_strRoomNum, g_strSeatNum);
+        g_pLog->WriteLog(0,"UP SeatNum RoomNum:%s",TempBuf);
+        qDebug("TempBuf:%s",TempBuf);
+        myHttp *phttp = new myHttp();
+        phttp->SetUrlIP(m_strServerIP);
+        phttp->Get(TempBuf);
+        phttp->GetData(JsonBuf);
+        qDebug("UP SeatNum RoomNum%s\n",JsonBuf);
+        g_pLog->WriteLog(0,"Recv Json:%s",JsonBuf);
+        g_pJson->Parse(JsonBuf);
+        g_pJson->ReadJson(&Recode,"success");
+        if(Recode)
+        {
+            WriteConfigString(CONFIGNAME,"ROOM","ClassName",g_strRoomNum);
+            WriteConfigString(CONFIGNAME,"ROOM","SeatName",g_strSeatNum);
+            m_bSetRoomfail = false;
+        }
+        else
+        {
+            //set failed
+    //        m_pMyDialog->setFlag(1);
+    //        m_pMyDialog->setText("设置失败!");
+    //        m_pMyDialog->show();
+            m_bSetRoomfail = true;
+        }
     }
 }
 
@@ -597,4 +651,53 @@ void SetForm::keyPressEvent(QKeyEvent *event)
         ui->listWidget_Ping->insertItem(m_pingCount, newItem);
         ui->lineEdit_Ping->setFocus();
     }
+}
+
+void SetForm::widget_resize()
+{
+    int scr_width = QApplication::desktop()->width();
+    int scr_height = QApplication::desktop()->height();
+    float factor_x = (float)scr_width/g_scr_old_width;
+    float factor_y = (float)scr_height/g_scr_old_height;
+    my_resize(this, factor_x, factor_y);
+    my_resize(ui->title_bar, factor_x, factor_y);
+    my_resize(ui->label_title, factor_x, factor_y);
+    my_resize(ui->btnExit, factor_x, factor_y);
+    my_resize(ui->SetTabWidget, factor_x, factor_y);
+    my_resize(ui->CancelpushButton, factor_x, factor_y);
+    my_resize(ui->SavepushButton, factor_x, factor_y);
+    ui->label_title->move(width()/2 - ui->label_title->width()/2, ui->label_title->y());
+    //tab1
+    my_resize(ui->DNSgroupBox, factor_x, factor_y);
+    my_resize(ui->IPgroupBox, factor_x, factor_y);
+//    my_resize(ui->AutoSetIPradioButton, factor_x, factor_y);
+//    my_resize(ui->ManualSetIPradioButton, factor_x, factor_y);
+//    my_resize(ui->IPlabel, factor_x, factor_y);
+//    my_resize(ui->IPlineEdit, factor_x, factor_y);
+//    my_resize(ui->ChildIPlabel, factor_x, factor_y);
+//    my_resize(ui->GetWaylabel, factor_x, factor_y);
+//    my_resize(ui->GetWaylineEdit, factor_x, factor_y);
+//    my_resize(ui->AutoSetDNSradioButton, factor_x, factor_y);
+//    my_resize(ui->ManualSetDNSradioButton, factor_x, factor_y);
+//    my_resize(ui->DNS1label, factor_x, factor_y);
+//    my_resize(ui->DNS1lineEdit, factor_x, factor_y);
+//    my_resize(ui->DNS2label, factor_x, factor_y);
+//    my_resize(ui->DNS2lineEdit, factor_x, factor_y);
+//    my_resize(ui->DNS3label, factor_x, factor_y);
+//    my_resize(ui->DNS3lineEdit, factor_x, factor_y);
+//    //tab
+
+      //tab2
+      my_resize(ui->ServerIPlabel, factor_x, factor_y);
+      my_resize(ui->ServerIPlineEdit, factor_x, factor_y);
+      my_resize(ui->SeatNumlabel, factor_x, factor_y);
+      my_resize(ui->SeatlineEdit, factor_x, factor_y);
+      my_resize(ui->Tiplabel22, factor_x, factor_y);
+      //tab3
+      my_resize(ui->lineEdit_Ping, factor_x, factor_y);
+      my_resize(ui->btn_network, factor_x, factor_y);
+      my_resize(ui->label_Tip, factor_x, factor_y);
+      //my_resize((QWidget *)ui->horizontalLayout_ping, factor_x, factor_y);
+      my_resize(ui->listWidget_Ping, factor_x, factor_y);
+      m_pLoagingFrame->move(width()/2 - m_pLoagingFrame->width()/2, height()/2 - m_pLoagingFrame->height()/2);
 }

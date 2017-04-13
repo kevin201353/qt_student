@@ -18,18 +18,23 @@ MyDialog::MyDialog(QWidget *parent) :
 //    this->setMaximumSize(400,200);
     m_Font.setPixelSize(20);
     m_pTextLabel->setFont(m_Font);
-    m_pOKPushButton->setMinimumSize(100,39);
-    m_pOKPushButton->setMaximumSize(100,39);
-    m_pOKPushButton->setStyleSheet(DIALOGOKPNG);
-    m_pCancelPushButton->setMinimumSize(100,39);
-    m_pCancelPushButton->setMaximumSize(100,39);
-    m_pCancelPushButton->setStyleSheet(DIALOGCANCELPNG);
+    m_pOKPushButton->setMinimumSize(80,30);
+    m_pOKPushButton->setMaximumSize(80,30);
+ //   m_pOKPushButton->setStyleSheet(DIALOGOKPNG);
+    m_pOKPushButton->setText("确定");
+    m_pOKPushButton->setStyleSheet("background-color: rgb(255,153,19); color:rgb(255,255,255)");
+    m_pCancelPushButton->setStyleSheet("background-color: rgb(255,153,19); color:rgb(255,255,255)");
+    m_pCancelPushButton->setMinimumSize(80,30);
+    m_pCancelPushButton->setMaximumSize(80,30);
+    m_pCancelPushButton->setText("取消");
+    //m_pCancelPushButton->setStyleSheet(DIALOGCANCELPNG);
    // this->setAttribute(Qt::WA_TranslucentBackground);
    // this->setStyleSheet("background:rgba(255,255,255,0);border:none;");
-    ui->title_bar->setStyleSheet("background-color: rgb(0,123,214)");
+   // ui->title_bar->setStyleSheet("background-color: rgb(0,123,214)");
+    ui->title_bar->setStyleSheet("background-color: rgb(255,153,19)");
     connect(ui->btnClose, SIGNAL(clicked(bool)), this, SLOT(exit_widget()));
     ui->btnClose->setVisible(true);
-    this->move(QApplication::desktop()->width()/2 - width()/2, QApplication::desktop()->height()/2 - height()/2);
+    widget_resize();
 }
 
 MyDialog::~MyDialog()
@@ -102,4 +107,19 @@ void MyDialog::update()
 //    qDebug() << strMsg;
 //    m_pTextLabel->setText(strMsg);
 //    m_nCount--;
+}
+
+void MyDialog::widget_resize()
+{
+    int scr_width = QApplication::desktop()->width();
+    int scr_height = QApplication::desktop()->height();
+    float factor_x = (float)scr_width/g_scr_old_width;
+    float factor_y = (float)scr_height/g_scr_old_height;
+    my_resize(this, factor_x, factor_y);
+    my_resize(ui->title_bar, factor_x, factor_y);
+    my_resize(ui->btnClose, factor_x, factor_y);
+    my_resize(ui->Textlabel, factor_x, factor_y);
+    my_resize(ui->OKpushButton, factor_x, factor_y);
+    my_resize(ui->CancelpushButton, factor_x, factor_y);
+    this->move(scr_width/2 - width()/2, scr_height/2 - height()/2);
 }

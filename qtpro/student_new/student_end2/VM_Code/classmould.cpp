@@ -3,18 +3,26 @@
 ClassMould::ClassMould(QWidget *parent,QString name):QLabel(parent),m_strClassName(name)
 {
     m_bIsChecked = false;
+    //QPixmap  pix_linux(LINUX);
     this->setPixmap(QPixmap(CLASS));
-    this->setMinimumSize(264,355);
-    this->setMaximumSize(264,355);
+    this->setMinimumSize(270,270);
+    this->setMaximumSize(270,270);
+    //this->setPixmap(QPixmap(LINUX));
+   // this->resize(pix_linux.width(), pix_linux.height());
     m_pShowName = new QLabel(this);
-    m_pShowName->setMinimumSize(264,80);
-    m_pShowName->setMaximumSize(264,80);
-    m_pShowName->move(0,230);
+    m_pShowName->setMinimumSize(185,33);
+    m_pShowName->setMaximumSize(185,33);
+    m_pShowName->move(42,197);
     m_pShowName->setAlignment(Qt::AlignCenter);
     m_Font.setPixelSize(30);
     m_pShowName->setFont(m_Font);
     m_pShowName->setText(m_strClassName);
-   //m_pShowName->setStyleSheet("background-color:rgb(23,34,56)");
+   // m_pShowName->setText("asdfasdf");
+   //this->setStyleSheet("background-color:rgb(23,34,56)");
+   //this->move(0, 300);
+    m_pClassPic = new QLabel(this);
+    m_pClassPic->setPixmap(QPixmap(CLASSPIC));
+    m_pClassPic->move(42,20);
 }
 
 void ClassMould::mousePressEvent(QMouseEvent *event)
@@ -48,6 +56,31 @@ void ClassMould::SetChecked(bool flag)
     else
     {
         this->setPixmap(QPixmap(CLASS));
+    }
+}
+void ClassMould::enterEvent(QEvent *event)
+{
+    //if(m_bIsChecked)
+    qDebug("EnterEvent[%d]...............................\n",m_bIsChecked);
+    if(m_bIsChecked)
+    {
+
+    }
+    else
+    {
+        //this->setPixmap(QPixmap(CLASSENTER));
+    }
+}
+void ClassMould::leaveEvent(QEvent *event)
+{
+    qDebug("LeaveEvent[%d].................................\n",m_bIsChecked);
+    if(m_bIsChecked)
+    {
+
+    }
+    else
+    {
+        //this->setPixmap(QPixmap(CLASS));
     }
 }
 bool ClassMould::IsChecked()

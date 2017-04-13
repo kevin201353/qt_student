@@ -129,6 +129,7 @@ public:
 private:
     bool isInvalidNetmask(const char *subnet);
     void keyPressEvent(QKeyEvent  *event);
+    void widget_resize();
 };
 
 #endif // SETFORM_H

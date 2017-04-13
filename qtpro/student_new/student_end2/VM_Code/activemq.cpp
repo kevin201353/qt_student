@@ -247,16 +247,17 @@ void ActiveMQConsumer::onMessage( const Message* message )
         strcpy(msg.Data, text.c_str());
         g_MsgQueue.AddQueMsg(msg);
 
-//        const TextMessage *txtMsg = dynamic_cast<const TextMessage*>(message);
-//        if (txtMsg != NULL) {
-//            std::string body = txtMsg->getText();
-//            char sztmp[1024] = {0};
-//            sprintf(sztmp, "Message #%d Received: %s\n", count, body.c_str());
-//            qDebug() << QString(sztmp);
-//            QueMsg msg;
-//            strcpy(msg.Data, body.c_str());
-//            g_MsgQueue.AddQueMsg(msg);
-//        }
+        /*
+        const TextMessage *txtMsg = dynamic_cast<const TextMessage*>(message);
+        if (txtMsg != NULL) {
+            std::string body = txtMsg->getText();
+            char sztmp[1024] = {0};
+            sprintf(sztmp, "Message #%d Received: %s\n", count, body.c_str());
+            qDebug() << QString(sztmp);
+            QueMsg msg;
+            strcpy(msg.Data, body.c_str());
+            g_MsgQueue.AddQueMsg(msg);
+        }*/
     }
     catch (CMSException& e)
     {

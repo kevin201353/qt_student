@@ -6,7 +6,7 @@
 #include <QDate>
 #include <QDesktopWidget>
 #include "qthread.h"
-#include "buildtime.h"
+//#include "buildtime.h"
 
 extern NetConfig   *g_pNetConfig;
 extern void amq_monitor();
@@ -107,7 +107,9 @@ LoginWidget::LoginWidget(QWidget *parent) :
     m_pLogoQLable = ui->Logolabel;
     m_pLogoQLable->setAlignment(Qt::AlignCenter);
     //m_pLogoQLable->setPixmap(QPixmap(LOGOPNG));
-
+    m_pLogoQLable2 = ui->label_Logo;
+    m_pLogoQLable2->setAlignment(Qt::AlignCenter);
+    m_pLogoQLable2->setPixmap(QPixmap(LOGOPNG2));
     m_pTimeLCDNumber = ui->TimeLcdNumber;
     m_pSoftInforLabel = ui->Informationlabel;
     m_pServerManPushButton = ui->ServerManpushButton;
@@ -116,20 +118,29 @@ LoginWidget::LoginWidget(QWidget *parent) :
     m_pShutdownPushButton = ui->ShutdownpushButton;
     m_pLeftPushButton = ui->LeftpushButton;
     m_pRightPushButton = ui->RightpushButton;
-    m_pEnterPushButton = ui->EnterpushButton;
+    //m_pEnterPushButton = ui->EnterpushButton;
+    //hide information
+    m_pSoftInforLabel->hide();
+    m_pSetPushButton->setEnabled(false);
+    m_pSetPushButton->setVisible(false);
+    m_pShutdownPushButton->setEnabled(false);
+    m_pShutdownPushButton->setVisible(false);
+    m_pTimeLCDNumber->setEnabled(false);
+    m_pTimeLCDNumber->setVisible(false);
+    //hide end
     m_pClassName1 = ui->label_1;
     m_pClassName2 = ui->label_2;
     m_pClassName3 = ui->label_3;
 
     //setTabOrder(m_pLoginPushButton,m_pUserNameLineEdit);
 
-    m_pRightPushButton->setMinimumSize(43,169);
+    m_pRightPushButton->setMinimumSize(34,59);
     m_pRightPushButton->setFlat(false);
    // m_pRightPushButton->setStyleSheet(QStringLiteral(RIGHTPNG));
     m_pRightPushButton->setStyleSheet(RIGHTPNG);
 
 
-    m_pLeftPushButton->setMinimumSize(43,169);
+    m_pLeftPushButton->setMinimumSize(34,59);
     m_pLeftPushButton->setFlat(false);
     //m_pLeftPushButton->setStyleSheet(QStringLiteral(LEFTPNG));
     m_pLeftPushButton->setStyleSheet(LEFTPNG);
@@ -157,17 +168,18 @@ LoginWidget::LoginWidget(QWidget *parent) :
     m_pTime = new QDateTime();
     m_pTimer->start();
     connect(m_pTimer,SIGNAL(timeout()),this,SLOT(OnTimeOut()));
-
-    m_pGroupWigdet = ui->groupBox;
-    m_pGroupWigdet->setEnabled(false);
+    SetEnable(false);
     m_pClassNameConfig = new ClassNameConfig();
-//    m_pClassNameConfig->AddClass("语文");
-//    m_pClassNameConfig->AddClass("数学");
-//    m_pClassNameConfig->AddClass("英语");
-//    m_pClassNameConfig->AddClass("1");
-//    m_pClassNameConfig->AddClass("2");
-//    m_pClassNameConfig->AddClass("3");
-//    m_pClassNameConfig->AddClass("4");
+#if 0
+    SetEnable(true);
+    m_pClassNameConfig->AddClass("语文","1");
+    m_pClassNameConfig->AddClass("数学","2");
+    m_pClassNameConfig->AddClass("英语","3");
+    m_pClassNameConfig->AddClass("1","4");
+    m_pClassNameConfig->AddClass("2","5");
+    m_pClassNameConfig->AddClass("3","6");
+    m_pClassNameConfig->AddClass("4","7");
+#endif
     m_pClassNameConfig->AddLabel(m_pClassName1);
     m_pClassNameConfig->AddLabel(m_pClassName2);
     m_pClassNameConfig->AddLabel(m_pClassName3);
@@ -175,8 +187,8 @@ LoginWidget::LoginWidget(QWidget *parent) :
 //   m_pClassNameConfig->ChooseOne();
 //    m_pClassNameConfig->SetLabelName();
 
-    m_pEnterPushButton->setMinimumSize(284,66);
-    m_pEnterPushButton->setStyleSheet(ENTER);
+//    m_pEnterPushButton->setMinimumSize(284,66);
+//    m_pEnterPushButton->setStyleSheet(ENTER);
     //m_pEnterPushButton->setEnabled(false);
     //170303
     //test
@@ -187,7 +199,7 @@ LoginWidget::LoginWidget(QWidget *parent) :
     connect(m_pClassName1,SIGNAL(LabelChecked()),this,SLOT(on_LabelChecked()));
     connect(m_pClassName2,SIGNAL(LabelChecked()),this,SLOT(on_LabelChecked()));
     connect(m_pClassName3,SIGNAL(LabelChecked()),this,SLOT(on_LabelChecked()));
-    connect(m_pEnterPushButton,SIGNAL(clicked()),this,SLOT(on_EnterPushButton()));
+    //connect(m_pEnterPushButton,SIGNAL(clicked()),this,SLOT(on_EnterPushButton()));
     connect(m_pClassName1,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
     connect(m_pClassName2,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
     connect(m_pClassName3,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
@@ -195,6 +207,8 @@ LoginWidget::LoginWidget(QWidget *parent) :
     connect(m_passui, SIGNAL(ShowPassUI()),this,SLOT(on_ShowPassUI()));
     //m_waitstuDialog = new WaitstuDialog();
     m_waitstu = new waitstu2();
+    connect(m_waitstu, SIGNAL(wait_showPassUI()), this, SLOT(on_SetpushButton_clicked()));
+    connect(m_waitstu, SIGNAL(wait_shutdown()), this, SLOT(on_ShutdownpushButton_clicked()));
     g_pNetConfig = new NetConfig();
     if(g_pLog == NULL)
     {
@@ -260,10 +274,10 @@ LoginWidget::LoginWidget(QWidget *parent) :
 //    QDate *date = new QDate();
 //    QDate date2 = date->currentDate();
 //    QString strdate = date2.toString("yyyyMMdd");
-    QString strsoft = m_pSoftInforLabel->text();
-    strsoft += ": V1.5_";
-    strsoft += new QString(buildtime);
-    m_pSoftInforLabel->setText(strsoft);
+//    QString strsoft = m_pSoftInforLabel->text();
+//    strsoft += ": V1.5_";
+//    strsoft += new QString(buildtime);
+//    m_pSoftInforLabel->setText(strsoft);
 //    if (date)
 //    {
 //        delete date;
@@ -273,8 +287,20 @@ LoginWidget::LoginWidget(QWidget *parent) :
     {
 
     }
-}
 
+    this->hide();
+    ReportMsg reportmsg;
+    reportmsg.action = USER_WAITINGDLG_SHOW;
+    call_msg_back(msg_respose, reportmsg);
+}
+void LoginWidget::SetEnable(bool flag)
+{
+    m_pLeftPushButton->setEnabled(flag);
+    m_pRightPushButton->setEnabled(flag);
+    m_pClassName1->setEnabled(flag);
+    m_pClassName2->setEnabled(flag);
+    m_pClassName3->setEnabled(flag);
+}
 void *InitThread(void *param)
 {
     if (param == NULL)
@@ -329,6 +355,9 @@ void *InitThread(void *param)
     g_pLog->WriteLog(0,"Recv Json:%s",JsonBuf);
 
     ///////////////////////////////////////////////////////////////
+    /// \brief strClassRoomName
+    ///
+#if 0
     char strClassRoomName[20][100];
     memset(JsonBuf,0,10240);
     memset(TempBuf,0,1024);
@@ -360,6 +389,7 @@ void *InitThread(void *param)
     if (pMyJson)
         delete pMyJson;
     pLoginWidget->m_pSetForm->m_pRoomNumcomboBox->setCurrentIndex(0);
+#endif
 }
 void *WhileFun(void *param)
 {
@@ -528,6 +558,7 @@ void LoginWidget::on_SetpushButton_clicked()
 void LoginWidget::on_ShowPassUI()
 {
     m_passui->hide();
+    m_passui->setpasstext("");
     g_pNetConfig->ReadFile();
     if(g_pNetConfig->m_pNetConfig->s_bIP)
     {
@@ -561,7 +592,7 @@ void LoginWidget::on_ShutdownpushButton_clicked()
 {
     //this->close();
     MyDialog *pshutdlg = new MyDialog();
-    pshutdlg->setText("确定关机！");
+    pshutdlg->setText("确认关闭终端？");
     pshutdlg->setFlag(SHUTDOWN);
     pshutdlg->show();
 }
@@ -709,14 +740,17 @@ static void *thrd_connect(void *)
     ReportMsg reportmsg;
     reportmsg.action = USER_WAITINGDLG_EXIT;
     call_msg_back(msg_respose, reportmsg);
+    loginWid->show();
     return NULL;
 }
 
 void LoginWidget::on_EnterPushButton()
 {
+    /*
     ReportMsg reportmsg;
     reportmsg.action = USER_WAITINGDLG_SHOW;
     call_msg_back(msg_respose, reportmsg);
+    */
     //m_pEnterPushButton->setEnabled(false);
     if(pthread_create(&g_contid,NULL,thrd_connect, NULL))
     {
