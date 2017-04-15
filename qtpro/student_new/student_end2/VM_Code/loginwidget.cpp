@@ -87,7 +87,7 @@ static void *MonitorSpicy(void *param)
                 system("sudo killall CloudClassRoom_Student");
             }else if ( nRet == 1)
             {
-                MySetConnectVm(false);
+                //MySetConnectVm(false);
             }
         }
         sleep(2);
@@ -225,11 +225,11 @@ LoginWidget::LoginWidget(QWidget *parent) :
         g_pMyHttp->SetUrlIP(QString(g_strServerIP));
     }
     g_ExitMsThread = false;
-    MySetConnectVm(false);
-    if(pthread_create(&g_spicypid,NULL,MonitorSpicy,this))
-    {
+//    MySetConnectVm(false);
+//    if(pthread_create(&g_spicypid,NULL,MonitorSpicy,this))
+//    {
 
-    }
+//    }
     if(g_pProcess == NULL)
     {
         g_pProcess = new process(this);
@@ -592,7 +592,7 @@ void LoginWidget::on_ShutdownpushButton_clicked()
 {
     //this->close();
     MyDialog *pshutdlg = new MyDialog();
-    pshutdlg->setText("确认关闭终端？");
+    pshutdlg->setText("您确认要关机？");
     pshutdlg->setFlag(SHUTDOWN);
     pshutdlg->show();
 }

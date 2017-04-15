@@ -66,7 +66,7 @@ static void *thrd_exec(void *param)
 //    }
 //    pclose(fp);
 //    MyMutex_lock();
-    MySetConnectVm(true);
+//    MySetConnectVm(true);
     system(g_szCmd);
 //    MyMutex_unlock();
  //   g_pLog->WriteLog(0,"zhaosenhua thrd_exec spicy running success.");
@@ -520,7 +520,7 @@ int process::ProcessThreadNew()
         long leasped = last_time - atol(datetime);
         QString str = QString::number(leasped, 10);
         qDebug() << "current interval time : " + str;
-        if (leasped > 30000)
+        if (leasped > 40000)
         {
               qDebug()<< "msg deal timeout, msg resend.";
               //g_pLog->WriteLog(0,"msg deal timeout, msg resend.");
@@ -533,7 +533,7 @@ int process::ProcessThreadNew()
         if (strcmp(ActionBuf,"classbegin") == 0)
         {
             //show wait_stu
-            MySetConnectVm(false);
+            //MySetConnectVm(false);
             ReportMsg reportmsg;
             reportmsg.action = USER_WAITINGDLG_SHOW;
             call_msg_back(msg_respose, reportmsg);
@@ -541,7 +541,7 @@ int process::ProcessThreadNew()
         if (strcmp(ActionBuf,"display") == 0)
         {
             //connect vm
-            MySetConnectVm(false);
+            //MySetConnectVm(false);
             char sz_host[100] = {0};
             char sz_port[50] = {0};
             char sz_vmid[100] = {0};
@@ -554,7 +554,7 @@ int process::ProcessThreadNew()
             qDebug("begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
             g_pLog->WriteLog(0,"begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
             int nRet = connect_vm(sz_host, sz_port, sz_vmid);
-            if (nRet == 1)
+            //if (nRet == 1)
             {
                 //connect vm success
                 int nCount = 0;
@@ -589,16 +589,16 @@ int process::ProcessThreadNew()
                 g_pLog->WriteLog(0,"zhaosenhua send msg response display: %s", MessageBuf);
                 qDebug("display response end.\n");
             }
-            if (nRet == 0)
+            //if (nRet == 0)
             {
-                 MySetConnectVm(false);
+                 //MySetConnectVm(false);
                  g_pLog->WriteLog(0,"sh msg display failed.");
             }
         }
         if (strcmp(ActionBuf,"classover") == 0)
         {
             //close wait_stu
-            MySetConnectVm(false);
+            //MySetConnectVm(false);
             qDebug("classover enter.");
             memset(MessageBuf,0,1024);
             /*
@@ -609,8 +609,8 @@ int process::ProcessThreadNew()
             m_pWidget->SetEnable(false);
             system("sudo kill -9 $(pgrep spicy)");
             system("sudo kill -9 $(pgrep eclass_client)");
-            int nRet = detect_process("spicy");
-            if (nRet == 0)
+            //int nRet = detect_process("spicy");
+            //if (nRet == 0)
             {
                 //over success
                  sprintf(MessageBuf,"###ap_confirmclassover###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
@@ -621,7 +621,7 @@ int process::ProcessThreadNew()
         }
         if (strcmp(ActionBuf,"start_demonstrate") == 0)
         {
-            MySetConnectVm(false);
+            //MySetConnectVm(false);
             /*
             ReportMsg reportmsg;
             reportmsg.action = USER_WAITINGDLG_SHOW;
@@ -635,8 +635,8 @@ int process::ProcessThreadNew()
             g_pJson->ReadJson_v(szCommand, "data", "command");
             qDebug("start_demonstrate command : %s.\n", szCommand);
             g_pLog->WriteLog(0,"start_demonstrate command : %s", szCommand);
-            int nRet = detect_process("eclass_client");
-            if (nRet == 0)
+            //int nRet = detect_process("eclass_client");
+            //if (nRet == 0)
             {
                 system("sudo killall -9 spicy");
                 system("sudo /usr/local/shencloud/disable_input.sh &");
@@ -653,7 +653,7 @@ int process::ProcessThreadNew()
         }
         if (strcmp(ActionBuf,"stop_demonstrate") == 0)
         {
-            MySetConnectVm(false);
+            //MySetConnectVm(false);
             memset(MessageBuf,0,1024);
             /*
             ReportMsg reportmsg;
@@ -677,7 +677,7 @@ int process::ProcessThreadNew()
         }
         if (strcmp(ActionBuf,"freeStudy") == 0)
         {
-            MySetConnectVm(false);
+            //MySetConnectVm(false);
             ReportMsg reportmsg;
             reportmsg.action = USER_WAITINGDLG_EXIT;
             call_msg_back(msg_respose, reportmsg);
@@ -760,35 +760,36 @@ int process::connect_vm(char *ip, char *port, char *vmid)
 {
     if (ip == NULL || port == NULL)
         return -1;
-    int nRet = detect_process("spicy");
-    if (nRet == 1)
-    {
-        system("sudo kill -9 $(pgrep spicy)");
-        return 2;
-    }
+//    int nRet = detect_process("spicy");
+//    if (nRet == 1)
+//    {
+//        //system("sudo kill -9 $(pgrep spicy)");
+//        return 2;
+//    }
     sprintf(g_szCmd, "sudo spicy.sh -h %s -p %s -f > %s", ip, port, "/usr/local/shencloud/log/spicy.log");
     strcpy(g_szRetVm, g_szCmd);
     if (pthread_create(&g_xtid, NULL, thrd_exec, NULL) != 0)
     {
         g_pLog->WriteLog(0,"zhaosenhua create spicy thread failed.");
     }
-    int ncount = 0;
-    nRet = 0;
-    while(1)
-    {
-        nRet = detect_process("spicy");
-        if (nRet == 1)
-        {
-            break;
-        }
-        if (ncount >= 10)
-        {
-            break;
-        }
-        ncount++;
-        sleep(1);
-    }
-    return nRet;
+//    int ncount = 0;
+//    nRet = 0;
+//    while(1)
+//    {
+//        nRet = detect_process("spicy");
+//        if (nRet == 1)
+//        {
+//            break;
+//        }
+//        if (ncount >= 10)
+//        {
+//            break;
+//        }
+//        ncount++;
+//        sleep(1);
+//    }
+//    return nRet;
+    return 0;
 }
 
 

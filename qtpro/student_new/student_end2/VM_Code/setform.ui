@@ -236,7 +236,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>教室机IP</string>
+      <string>教师机IP</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

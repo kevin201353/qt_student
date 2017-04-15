@@ -31,7 +31,8 @@ MyDialog::MyDialog(QWidget *parent) :
    // this->setAttribute(Qt::WA_TranslucentBackground);
    // this->setStyleSheet("background:rgba(255,255,255,0);border:none;");
    // ui->title_bar->setStyleSheet("background-color: rgb(0,123,214)");
-    ui->title_bar->setStyleSheet("background-color: rgb(255,153,19)");
+   // ui->title_bar->setStyleSheet("background-color: rgb(255,153,19)");
+    ui->title_bar->setVisible(false);
     connect(ui->btnClose, SIGNAL(clicked(bool)), this, SLOT(exit_widget()));
     ui->btnClose->setVisible(true);
     widget_resize();
@@ -66,7 +67,7 @@ void MyDialog::setText(QString Text)
 void MyDialog::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-   // painter.drawPixmap(0,0,width(),height(),QPixmap(DIALOGPNG));
+    painter.drawPixmap(0,0,width(),height(),QPixmap(DIALOGPNG1));
 
 }
 

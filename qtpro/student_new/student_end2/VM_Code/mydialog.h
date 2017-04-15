@@ -9,7 +9,7 @@
 #include <QTimer>
 #include "global.h"
 
-#define DIALOGPNG       "/usr/local/shencloud/image1/DialogBack.png"
+#define DIALOGPNG1       "/usr/local/shencloud/image1/msgboxbg.png"
 
 #define DIALOGOKPNG     "QPushButton{border-image: url(/usr/local/shencloud/image1/DialogOK.png);}"\
                         "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/DialogOKPress.png);}"\

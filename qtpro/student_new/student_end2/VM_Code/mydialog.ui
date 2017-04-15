@@ -23,8 +23,8 @@
     <rect>
      <x>-8</x>
      <y>-3</y>
-     <width>481</width>
-     <height>45</height>
+     <width>10</width>
+     <height>10</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -33,22 +33,6 @@
    <property name="frameShadow">
     <enum>QFrame::Raised</enum>
    </property>
-   <widget class="QPushButton" name="btnClose">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>19</y>
-      <width>16</width>
-      <height>13</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-image: url(:/image1/x.png);</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
   </widget>
   <widget class="QLabel" name="Textlabel">
    <property name="geometry">
@@ -98,6 +82,22 @@
    </property>
    <property name="styleSheet">
     <string notr="true">color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnClose">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>10</y>
+     <width>16</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-image: url(:/image1/x.png);</string>
    </property>
    <property name="text">
     <string/>
