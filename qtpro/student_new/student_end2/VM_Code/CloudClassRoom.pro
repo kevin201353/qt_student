@@ -8,7 +8,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets network
 
-TARGET = CloudClassRoom
+DESTDIR = /usr/local/shencloud
+TARGET = CloudClassRoom_Student
 TEMPLATE = app
 
 
@@ -39,7 +40,8 @@ SOURCES += main.cpp\
     setform.cpp \
     passwordui.cpp \
     stwidget.cpp \
-    aboutui.cpp
+    aboutui.cpp \
+    mqmsgprocess.cpp
 
 HEADERS  += loginwidget.h \
     setform.h \
@@ -68,7 +70,8 @@ HEADERS  += loginwidget.h \
     buildtime.h \
     passwordui.h \
     stwidget.h \
-    aboutui.h
+    aboutui.h \
+    mqmsgprocess.h
 
 FORMS    += loginwidget.ui \
     setform.ui \

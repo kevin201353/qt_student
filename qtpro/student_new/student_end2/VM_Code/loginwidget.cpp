@@ -21,6 +21,10 @@ void *InitThread(void *param);
 static pthread_t g_xtid = 0;
 static char g_szCmd[1024] = {0};
 static bool g_ExitMsThread = false;
+extern char buildtime[32];
+bool   g_processThread = false;
+
+MqMsgProcess  g_mqMsgProcess;
 
 #define SPICY_LOG_PATH  "/usr/local/shencloud/log/spicy.log"
 
@@ -77,19 +81,19 @@ static void *MonitorSpicy(void *param)
 //            fclose(pp);
 //        }
 //        //MyMutex_unlock();
-        if (bMyGetConnectVm())
-        {
-            sleep(2);
-            int nRet = detect_process("spicy");
-            if ( nRet == 0)
-            {
-                g_pLog->WriteLog(0,"zhaosenhua spicy exception, CloudClassRoom_Student reboot.");
-                system("sudo killall CloudClassRoom_Student");
-            }else if ( nRet == 1)
-            {
-                //MySetConnectVm(false);
-            }
-        }
+//        if (bMyGetConnectVm())
+//        {
+//            sleep(2);
+//            int nRet = detect_process("spicy");
+//            if ( nRet == 0)
+//            {
+//                g_pLog->WriteLog(0,"zhaosenhua spicy exception, CloudClassRoom_Student reboot.");
+//                system("sudo killall CloudClassRoom_Student");
+//            }else if ( nRet == 1)
+//            {
+//                //MySetConnectVm(false);
+//            }
+//        }
         sleep(2);
     }
     return NULL;
@@ -225,33 +229,23 @@ LoginWidget::LoginWidget(QWidget *parent) :
         g_pMyHttp->SetUrlIP(QString(g_strServerIP));
     }
     g_ExitMsThread = false;
+    g_processThread = false;
 //    MySetConnectVm(false);
 //    if(pthread_create(&g_spicypid,NULL,MonitorSpicy,this))
 //    {
 
 //    }
-    if(g_pProcess == NULL)
-    {
-        g_pProcess = new process(this);
-        int iRecode = g_pProcess->Start();
-        if(iRecode < 0)
-        {
-            printf("New process Error\n");
-        }
-    }
+//    if(g_pProcess == NULL)
+//    {
+//        g_pProcess = new process(this);
+//        int iRecode = g_pProcess->Start();
+//        if(iRecode < 0)
+//        {
+//            printf("New process Error\n");
+//        }
+//    }
     initConfig();
-    activemq::library::ActiveMQCPP::initializeLibrary();
-    g_Pconsume = NULL;
-    g_Pproduce = NULL;
-    if(g_Pconsume == NULL)
-    {
-        g_Pconsume = new ActiveMQConsumer();
-        g_Pconsume->start(g_strConsumerAdd,g_strConsumerQueue,false,false);
-    }
-    if(g_Pproduce == NULL)
-    {
-        g_Pproduce = new ActiveMQProduce();
-    }
+    g_mqMsgProcess.start();
     g_bSetupAmq = false;
     //create_msg_queue();
     wait_net_setup();
@@ -287,7 +281,6 @@ LoginWidget::LoginWidget(QWidget *parent) :
     {
 
     }
-
     this->hide();
     ReportMsg reportmsg;
     reportmsg.action = USER_WAITINGDLG_SHOW;
@@ -308,15 +301,6 @@ void *InitThread(void *param)
 
     LoginWidget *pLoginWidget = (LoginWidget *)param;
     g_resetamq = false;
-//    char data[100] = {0};
-//    for(int i=0; i<10; i++)
-//    {
-//        memset(data, 0, 100);
-//        msg_recv(data);
-//        if (strcmp(data, "0") == 0)
-//            break;
-//        qDebug() << "msg queue have message:  " + QString(data);
-//    }
     while(true)
     {
         if (g_bSetupAmq)
@@ -330,6 +314,18 @@ void *InitThread(void *param)
         qDebug() << "wait net running.\n";
         sleep(2);
     }
+    activemq::library::ActiveMQCPP::initializeLibrary();
+    g_Pconsume = NULL;
+    g_Pproduce = NULL;
+    if(g_Pconsume == NULL)
+    {
+        g_Pconsume = new ActiveMQConsumer();
+        g_Pconsume->start(g_strConsumerAdd,g_strConsumerQueue,false,false);
+    }
+    if(g_Pproduce == NULL)
+    {
+        g_Pproduce = new ActiveMQProduce();
+    }
     if(g_Pconsume != NULL)
     {
         g_Pconsume->runConsumer();
@@ -338,21 +334,22 @@ void *InitThread(void *param)
     {
         g_Pproduce->start(g_strProduceAdd,20,g_strProduceQueue,false,false);
     }
-    g_pProcess->GetAddrMac();
+    g_mqMsgProcess.GetAddrMac();
+ //   g_pProcess->GetAddrMac();
     ///////////////////////////////////////////////////////////////
-    char TempBuf[1024];
-    char JsonBuf[10240];
-    memset(JsonBuf,0,10240);
-    memset(TempBuf,0,1024);
-    sprintf(TempBuf,"/service/aps/config?id=%s&roomName=%s&seat=%s&reboot=false",g_strTerminalID,g_strRoomNum,g_strSeatNum);
-    g_pLog->WriteLog(0,"UP SeatNum RoomNum:%s",TempBuf);
-   // qDebug("TempBuf:%s",TempBuf);
-    myHttp http;
-    http.SetUrlIP(g_strServerIP);
-    http.Get(TempBuf);
-    http.GetData(JsonBuf);
-    qDebug("xxxxxx amq UP SeatNum RoomNum%s\n",JsonBuf);
-    g_pLog->WriteLog(0,"Recv Json:%s",JsonBuf);
+//    char TempBuf[1024];
+//    char JsonBuf[10240];
+//    memset(JsonBuf,0,10240);
+//    memset(TempBuf,0,1024);
+//    sprintf(TempBuf,"/service/aps/config?id=%s&roomName=%s&seat=%s&reboot=false&sync=false",g_strTerminalID,g_strRoomNum,g_strSeatNum);
+//    g_pLog->WriteLog(0,"UP SeatNum RoomNum:%s",TempBuf);
+//   // qDebug("TempBuf:%s",TempBuf);
+//    myHttp http;
+//    http.SetUrlIP(g_strServerIP);
+//    http.Get(TempBuf);
+//    http.GetData(JsonBuf);
+//    qDebug("xxxxxx amq UP SeatNum RoomNum%s\n",JsonBuf);
+//    g_pLog->WriteLog(0,"Recv Json:%s",JsonBuf);
 
     ///////////////////////////////////////////////////////////////
     /// \brief strClassRoomName
@@ -416,7 +413,11 @@ void LoginWidget::initConfig()
     qDebug(g_strProduceAdd);
     GetConfigString(CONFIGNAME,"ROOM","ClassName","Default",g_strRoomNum,100);
     GetConfigString(CONFIGNAME,"ROOM","SeatName","A1",g_strSeatNum,20);
-    qDebug("%s %s",g_strRoomNum,g_strSeatNum);
+    qDebug("%s %s",g_strRoomNum, g_strSeatNum);
+    char szVer[100] = {0};
+    strcpy(szVer, "V1.1_");
+    strcat(szVer, (char*)buildtime);
+    WriteConfigString(CONFIGNAME, "ROOM", "Version", szVer);
 }
 
 void LoginWidget::SetChecked()
@@ -679,7 +680,7 @@ static void *thrd_connect(void *)
             g_pLog->WriteLog(0,"IP:%s Port:%d Ticket:%s VmID:%s",IP,Port,Ticket,g_pProcess->m_strVmID);
             system("cat /tmp/data_*");
             system("rm -f /tmp/data_*");
-            sprintf(g_szCmd, "spicy.sh -h %s -p %d -f > %s", IP, Port, "/usr/local/shencloud/log/spicy.log");
+            sprintf(g_szCmd, "spicy -h %s -p %d -f > %s", IP, Port, "/usr/local/shencloud/log/spicy.log");
             if (pthread_create(&g_xtid, NULL, thrd_exec, NULL) != 0)
             {
                 g_pLog->WriteLog(0,"zhaosenhua create spicy thread failed.");
@@ -740,17 +741,15 @@ static void *thrd_connect(void *)
     ReportMsg reportmsg;
     reportmsg.action = USER_WAITINGDLG_EXIT;
     call_msg_back(msg_respose, reportmsg);
-    loginWid->show();
     return NULL;
 }
 
 void LoginWidget::on_EnterPushButton()
 {
-    /*
+
     ReportMsg reportmsg;
     reportmsg.action = USER_WAITINGDLG_SHOW;
     call_msg_back(msg_respose, reportmsg);
-    */
     //m_pEnterPushButton->setEnabled(false);
     if(pthread_create(&g_contid,NULL,thrd_connect, NULL))
     {

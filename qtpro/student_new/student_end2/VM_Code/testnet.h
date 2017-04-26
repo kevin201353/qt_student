@@ -78,10 +78,17 @@ static void gethw_name()
 	fclose(fp);  
 }
 
+//extern bool g_bpause_net_check;
 static void* thrd_net_setup(void * param)
 {
 	for (;;)
 	{
+//        if (g_bpause_net_check)
+//        {
+//            qDebug() << "thrd_net_setup  net checking .....";
+//            sleep(2);
+//            continue;
+//        }
 		int fd;
 		interface_status_t status;
 		if((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)  
@@ -123,7 +130,7 @@ static void* thrd_net_setup(void * param)
 //                //g_pLog->WriteLog(0, "thrd_net_setup 22222222222222222222 amq thread is alive.\n");
 //            }
 //        }
-		sleep(1);
+        sleep(2);
 	}
 }
 

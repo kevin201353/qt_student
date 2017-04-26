@@ -47,7 +47,7 @@ static void *thrd_amq(void *param)
             call_msg_back(msg_respose, reportmsg);
             g_resetamq = false;
         }
-        sleep(1);
+        sleep(3);
     }
 }
 

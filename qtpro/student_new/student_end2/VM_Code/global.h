@@ -61,6 +61,7 @@ extern bool bMyGetConnectVm();
 extern void MySetConnectVm(bool bval);
 extern float g_scr_old_width;
 extern float g_scr_old_height;
+extern bool  g_processThread;
 extern int my_resize(QWidget* widget, float factorX, float factorY);
 #define PIPE_WAIT(x) ({msg_send(x);})
 #endif // GLOBAL_H

@@ -122,7 +122,7 @@ long __GetTime()
     struct timeval iTime;
     gettimeofday(&iTime, NULL);
     //long lTime = ((long)iTime.tv_sec) * 1000000 + (long)iTime.tv_usec;
-    long lTime = ((long)iTime.tv_sec) * 1000;
+    long lTime = ((long)iTime.tv_sec) * 1000 + (long)iTime.tv_usec/1000;
     return lTime;
 }
 

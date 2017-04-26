@@ -120,7 +120,7 @@ SetForm::SetForm(QWidget *parent) :
 //    m_pMyDialog = NULL;
 //    m_pMyDialog = new MyDialog(this);
 //    m_pMyDialog->hide();
-    m_bSetRoomfail = false;
+//    m_bSetRoomfail = false;
     m_pqthread = NULL;
     m_pqthread = new qthreadPing();
     connect(m_pqthread, SIGNAL(NoticeMsg()), this, SLOT(update()));
@@ -294,6 +294,19 @@ void *SystemThread(void *param)
 void SetForm::on_SavepushButton_clicked()
 {
     pthread_t pid;
+
+    if (!ui->IPlineEdit->isModified() &&
+         !ui->ChildIPlineEdit->isModified() &&
+            !ui->GetWaylineEdit->isModified() &&
+            !ui->DNS1lineEdit->isModified() &&
+            !ui->DNS2lineEdit->isModified() &&
+            !ui->ServerIPlineEdit->isModified() &&
+            !ui->SeatlineEdit->isModified())
+    {
+        this->close();
+        qDebug() << "setform no modified.";
+        return;
+    }
 
     memset(g_pNetConfig->m_pNetConfig,0,sizeof(g_pNetConfig->m_pNetConfig));
     g_pNetConfig->m_pNetConfig->s_bDNS = m_bDHCP_DNS;
@@ -566,36 +579,36 @@ void SetForm::saveRoomSeat()
         //strncpy(g_strRoomNum,m_pRoomNumcomboBox->currentText().toStdString().c_str(),100);
         strncpy(g_strSeatNum,m_pSeatLineEdit->text().toStdString().c_str(),20);
         g_pLog->WriteLog(0,"Set Room Num:%s Sear Num:%s",g_strRoomNum,g_strSeatNum);
-        char TempBuf[1024];
-        char JsonBuf[10240];
-        bool Recode = false;
-        memset(JsonBuf,0,10240);
-        memset(TempBuf,0,1024);
-        sprintf(TempBuf,"/service/aps/config?id=%s&roomName=%s&seat=%s&reboot=false&sync=false", g_strTerminalID, g_strRoomNum, g_strSeatNum);
-        g_pLog->WriteLog(0,"UP SeatNum RoomNum:%s",TempBuf);
-        qDebug("TempBuf:%s",TempBuf);
-        myHttp *phttp = new myHttp();
-        phttp->SetUrlIP(m_strServerIP);
-        phttp->Get(TempBuf);
-        phttp->GetData(JsonBuf);
-        qDebug("UP SeatNum RoomNum%s\n",JsonBuf);
-        g_pLog->WriteLog(0,"Recv Json:%s",JsonBuf);
-        g_pJson->Parse(JsonBuf);
-        g_pJson->ReadJson(&Recode,"success");
-        if(Recode)
+//        char TempBuf[1024];
+//        char JsonBuf[10240];
+//        bool Recode = false;
+//        memset(JsonBuf,0,10240);
+//        memset(TempBuf,0,1024);
+//        sprintf(TempBuf,"/service/aps/config?id=%s&roomName=%s&seat=%s&reboot=false&sync=false", g_strTerminalID, g_strRoomNum, g_strSeatNum);
+//        g_pLog->WriteLog(0,"UP SeatNum RoomNum:%s",TempBuf);
+//        qDebug("TempBuf:%s",TempBuf);
+//        myHttp *phttp = new myHttp();
+//        phttp->SetUrlIP(m_strServerIP);
+//        phttp->Get(TempBuf);
+//        phttp->GetData(JsonBuf);
+//        qDebug("UP SeatNum RoomNum%s\n",JsonBuf);
+//        g_pLog->WriteLog(0,"Recv Json:%s",JsonBuf);
+//        g_pJson->Parse(JsonBuf);
+//        g_pJson->ReadJson(&Recode,"success");
+//        if(Recode)
         {
             WriteConfigString(CONFIGNAME,"ROOM","ClassName",g_strRoomNum);
             WriteConfigString(CONFIGNAME,"ROOM","SeatName",g_strSeatNum);
-            m_bSetRoomfail = false;
+//            m_bSetRoomfail = false;
         }
-        else
-        {
+//        else
+//        {
             //set failed
     //        m_pMyDialog->setFlag(1);
     //        m_pMyDialog->setText("设置失败!");
     //        m_pMyDialog->show();
-            m_bSetRoomfail = true;
-        }
+//            m_bSetRoomfail = true;
+//        }
     }
 }
 
