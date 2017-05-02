@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/time.h>
+#include "type.h"
 
 NetConfig   *g_pNetConfig;
 process     *g_pProcess = NULL;
@@ -117,12 +118,19 @@ int ping_net(char *ip)
 }
 
 //current time millls
+#ifdef ARM
 long long  __GetTime()
+#else
+long __GetTime();
+#endif
 {
     struct timeval iTime;
     gettimeofday(&iTime, NULL);
-    //long lTime = ((long)iTime.tv_sec) * 1000000 + (long)iTime.tv_usec;
+#ifdef ARM
     long long lTime = ((long long )iTime.tv_sec) * 1000 + (long long)iTime.tv_usec/1000;
+#else
+    long lTime = ((long)iTime.tv_sec) * 1000 + (long)iTime.tv_usec/1000;
+#endif
     return lTime;
 }
 

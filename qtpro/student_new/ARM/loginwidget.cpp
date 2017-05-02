@@ -7,6 +7,7 @@
 #include <QDesktopWidget>
 #include "qthread.h"
 //#include "buildtime.h"
+#include "type.h"
 
 extern NetConfig   *g_pNetConfig;
 extern void amq_monitor();
@@ -259,9 +260,11 @@ LoginWidget::LoginWidget(QWidget *parent) :
 //        delete date;
 //        date = NULL;
 //    }
+#ifdef ARM
 	if(pthread_create(&g_spicypid,NULL,MonitorSpicy,this))
 	{
 	}
+#endif
 
     if(pthread_create(&g_amqpid,NULL,InitThread,this))
     {
@@ -320,6 +323,7 @@ void *InitThread(void *param)
         g_Pproduce->start(g_strProduceAdd,20,g_strProduceQueue,false,false);
     }
     g_mqMsgProcess.GetAddrMac();
+#ifdef ARM
 	myHttp http;
 	http.SetUrlIP(g_strServerIP);
 	char data[100] = {0};
@@ -341,7 +345,8 @@ void *InitThread(void *param)
 		//g_interval_time = (unsigned long long)abs(g_interval_time - __GetTime());
 		g_interval_time = g_interval_time - __GetTime();
 		g_pLog->WriteLog(0,"student client recv server time g_interval_time = :%lld,  _GetTime = %lld", g_interval_time, __GetTime());
-	} 
+	}
+#endif
 	
  //   g_pProcess->GetAddrMac();
     ///////////////////////////////////////////////////////////////
@@ -688,7 +693,7 @@ static void *thrd_connect(void *)
             g_pLog->WriteLog(0,"IP:%s Port:%d Ticket:%s VmID:%s",IP,Port,Ticket,g_pProcess->m_strVmID);
             system("cat /tmp/data_*");
             system("rm -f /tmp/data_*");
-            sprintf(g_szCmd, "sudo spicy -h %s -p %d -f > %s", IP, Port, "/usr/local/shencloud/log/spicy.log");
+            sprintf(g_szCmd, "sudo spicy -h %s -p %d -f > %s 2>&1", IP, Port, "/usr/local/shencloud/log/spicy.log");
             if (pthread_create(&g_xtid, NULL, thrd_exec, NULL) != 0)
             {
                 g_pLog->WriteLog(0,"zhaosenhua create spicy thread failed.");
@@ -811,6 +816,7 @@ void LoginWidget::createPipe()
 
 void LoginWidget::UpdateNetOffDialog()
 {
+
     if (m_pMyDialog)
     {
         qDebug() << "hide netoff dailog 0000.";

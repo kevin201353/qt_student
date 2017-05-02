@@ -263,9 +263,8 @@ void ActiveMQConsumer::onMessage( const Message* message )
         //QueMsg msg;
         //strcpy(msg.Data, text.c_str());
         //g_MsgQueue.AddQueMsg(msg);
-        g_myBuffer.clear();
         g_myBuffer.add((char *)text.c_str());
-
+		
         /*
         const TextMessage *txtMsg = dynamic_cast<const TextMessage*>(message);
         if (txtMsg != NULL) {

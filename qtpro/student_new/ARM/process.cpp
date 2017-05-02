@@ -11,6 +11,73 @@ extern MyQueue  g_MsgQueue;
 void *ProcessFun(void *param);
 void *ThreadForSystem(void *para);
 void _kill_spicy_eclass(char *spicy, char *eclass);
+extern void _system(char * cmd);
+#define BUF_SIZE  512
+
+
+
+//===================== add by linyuhua==================
+//cat ps_eclass_client | grep eclass_client | head -n 1 | grep eclass_client | awk '{print $15}'
+//ip
+//cat ps_eclass_client | grep eclass_client | head -n 1 | grep eclass_client | awk '{print $17}'
+//p
+//root@leclass:~# ps aux | grep spicy | head -n 1 | awk '{print $16}'
+//192.168.110.211
+//root@leclass:~# ps aux | grep spicy | head -n 1 | awk '{print $18}'
+//5934
+int  get_spicy_ip(char* ip)
+{
+    int nRet = 0;
+    FILE* fp = NULL;
+    int count = 0;
+    char buf[BUF_SIZE] = {0};
+    char command[BUF_SIZE] = "ps aux | grep spicy | head -n 1 | awk '{print $16}'";
+
+    memset(buf, 0, BUF_SIZE);
+    fp = popen(command, "r");
+    if (fp == NULL)
+    {
+        qDebug("get_spicy_ip failed.\n");
+        g_pLog->WriteLog(0, "get_spicy_ip failed.\n");
+        return -1;
+    }
+    if (fgets(buf, BUF_SIZE, fp) != NULL)
+    {
+        memcpy(ip, buf, strlen(buf)-1);
+    }
+    if (fp != NULL)
+        pclose(fp);
+    return 1;
+}
+
+int  get_spicy_port(void)
+{
+    int port;
+    int nRet = 0;
+    FILE* fp = NULL;
+    int count = 0;
+    char buf[BUF_SIZE] = {0};
+    char command[BUF_SIZE] = "ps aux | grep spicy | head -n 1 | awk '{print $18}'";
+
+    memset(buf, 0, BUF_SIZE);
+    fp = popen(command, "r");
+    if (fp == NULL)
+    {
+        qDebug("get_spicy_port failed.\n");
+        g_pLog->WriteLog(0, "get_spicy_port failed.\n");
+        return -1;
+    }
+    if (fgets(buf, BUF_SIZE, fp) != NULL)
+    {
+        port = atoi(buf);
+    }
+    if (fp != NULL)
+        pclose(fp);
+
+    return port;
+}
+//===================================================
+
 
 void WaitChildren(int num)
 {
@@ -448,14 +515,7 @@ void *ThreadForSystem(void *para)
         strcpy(SystemBuf,p);
         printf("sysTem:%s\n",SystemBuf);
 		_kill_spicy_eclass("spicy", "eclass_client");
-        system(SystemBuf);
-//        FILE *fp;
-//        if ((fp = popen(SystemBuf, "r")) == NULL)
-//        {
-//            g_pLog->WriteLog(0,"zhaosenhua ThreadForSystem spicy cmd failed.");
-//        }
-//        if (fp != NULL)
-//            pclose(fp);
+        _system(SystemBuf);
     }
 }
 void process::Lock()
@@ -643,7 +703,7 @@ int process::ProcessThreadNew()
             g_pLog->WriteLog(0,"start_demonstrate command : %s", szCommand);
             system("sudo killall spicy");
             //system("sudo /usr/local/shencloud/disable_input.sh &");
-            strcat(szCommand, " >>/usr/local/shencloud/log/Eclass.log");
+            strcat(szCommand, " >>/usr/local/shencloud/log/Eclass.log 2>&1");
             int nRet = detect_process("eclass_client");
             if (nRet == 0)
             {
@@ -741,7 +801,6 @@ int process::ProcessThreadNew()
     return 0;
 }
 
-#define BUF_SIZE  150
 int detect_process(char* szProcess)
 {
     int nRet = 0;
@@ -760,6 +819,11 @@ int detect_process(char* szProcess)
     if (fgets(buf, BUF_SIZE, fp) != NULL)
     {
         count = atoi(buf);
+		//test
+		char sztmp[512] = {0};
+		sprintf(sztmp, "22222  detect_process(), fgets buf = %s.", buf);
+		g_pLog->WriteLog(0,sztmp);
+		//test
         if (count == 0)
             nRet = 0;
         else
@@ -779,7 +843,7 @@ int process::connect_vm(char *ip, char *port, char *vmid)
     {
         system("sudo kill -9 $(pgrep spicy)");
     }
-    sprintf(g_szCmd, "sudo spicy -h %s -p %s -f > %s", ip, port, "/usr/local/shencloud/log/spicy.log");
+    sprintf(g_szCmd, "sudo spicy -h %s -p %s -f > %s 2>&1", ip, port, "/usr/local/shencloud/log/spicy.log");
     strcpy(g_szRetVm, g_szCmd);
     if (pthread_create(&g_xtid, NULL, thrd_exec, NULL) != 0)
     {

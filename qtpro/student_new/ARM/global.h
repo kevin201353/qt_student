@@ -10,8 +10,6 @@
 #include <fcntl.h>
 #include <QWidget>
 
-#define  ARM   1
-
 #define USER_WAITINGDLG_SHOW   100
 #define USER_WAITINGDLG_EXIT   101
 #define USER_WAITINGDLG_RESET  102
@@ -19,6 +17,7 @@
 #define USER_MSG_NETDOWN       104
 #define USER_MSG_NETDLG_HIDE   105
 #define QUE_MSG_LEN 1024  
+#define USET_MSG_PROCESSMSG    107
 
 #define FIFO_PIPE   "/usr/local/shencloud/student_fifo"
 

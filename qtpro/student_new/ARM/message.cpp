@@ -117,6 +117,11 @@ void msg_respose(ReportMsg msg)
             qDebug() << "zhaosenhua, msg_respose reset amq prcess. network is unreachable.\n";
         }
         break;
+	   case USET_MSG_PROCESSMSG:
+	   	{
+			
+		}
+	   break;
     case USER_MSG_NETDLG_HIDE:
         {
         }
