@@ -121,7 +121,7 @@ int ping_net(char *ip)
 #ifdef ARM
 long long  __GetTime()
 #else
-long __GetTime();
+long __GetTime()
 #endif
 {
     struct timeval iTime;

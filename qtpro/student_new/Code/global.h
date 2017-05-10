@@ -19,6 +19,8 @@
 #define QUE_MSG_LEN 1024  
 #define USET_MSG_PROCESSMSG    107
 
+#define USER_MSG_FREESTUDY     108
+
 #define FIFO_PIPE   "/usr/local/shencloud/student_fifo"
 
 #define PIPE_SPICYLOG(x) ({ FILE *fp = fopen("/usr/local/shencloud/student_spicy", "a+"); \
@@ -53,7 +55,11 @@ extern void amq_monitor();
 extern bool    g_exitMonitoramq;
 extern pthread_t g_monitoramq;
 extern int ping_net(char *ip);
+#ifdef ARM
 extern long long  __GetTime();
+#else
+extern long __GetTime();
+#endif
 extern void InitMyMutex();
 extern void MyMutex_lock();
 extern void MyMutex_unlock();

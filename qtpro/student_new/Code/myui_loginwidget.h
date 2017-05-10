@@ -67,6 +67,8 @@ public:
     QSpacerItem *verticalSpacer;
     QSpacerItem *verticalSpacer_4;
 
+    QPushButton *EnterpushButton;
+
     void setupUi(QWidget *LoginWidget)
     {
         if (LoginWidget->objectName().isEmpty())
@@ -257,6 +259,9 @@ public:
         gridLayout->addItem(verticalSpacer_4, 6, 0, 1, 1);
 
         label_Logo->raise();
+
+        EnterpushButton = new QPushButton(LoginWidget);
+        EnterpushButton->setObjectName(QStringLiteral("EnterpushButton"));
 
         retranslateUi(LoginWidget);
 

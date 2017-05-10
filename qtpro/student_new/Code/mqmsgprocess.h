@@ -15,6 +15,7 @@ public:
     void _MqMsgProcess();
     void GetAddrMac();
     void start();
+    void _abotThread();
 public:
     char m_strVmID[50];
     char m_strMac[50];

@@ -33,7 +33,6 @@ void ActiveMQProduce::start( const std::string& brokerURI, unsigned int numMessa
     this->brokerURI = brokerURI;
     this->destURI = destURI;
     this->clientAck = clientAck;
-
     initialize();
 }
 

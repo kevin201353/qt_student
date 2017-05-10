@@ -39,8 +39,8 @@ waitstu2::waitstu2(QWidget *parent) :
     ui->setupUi(this);
     this->setAutoFillBackground(true);
     this->setWindowModality(Qt::ApplicationModal);
- //   this->setWindowFlags(Qt::WindowStaysOnTopHint);
-//    this->setWindowFlags(this->windowFlags()& ~Qt::WindowMinMaxButtonsHint);
+    //this->setWindowFlags(Qt::WindowStaysOnTopHint);
+ //   this->setWindowFlags(this->windowFlags()& ~Qt::WindowMinMaxButtonsHint);
 //    QDesktopWidget *desktopWidget = QApplication::desktop();
 //    QRect deskRect = desktopWidget->availableGeometry();
 //    this->setGeometry(QRect((deskRect.width() - width())/2, (deskRect.height() - this->height())/2, width(), height()));

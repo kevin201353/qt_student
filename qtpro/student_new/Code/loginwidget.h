@@ -31,6 +31,7 @@
 #define LOGOPNG      "/usr/local/shencloud/image1/Logo_Student.png"
 #define LOGOPNG2     "/usr/local/shencloud/image1/LeTOS_03.png"
 #define DESKTOPMAP  "/usr/local/shencloud/image1/Top_Student1.png"
+#define ENTERPUSH   "/usr/local/shencloud/image1/enter_new.png"
 //#define USRLOGO      "/usr/local/shencloud/pengjian/QtProject/CloudClassRoom/image1/Username.png"
 //#define PASSWDLOGO  "/usr/local/shencloud/pengjian/QtProject/CloudClassRoom/image1/Userpasswd.png"
 
@@ -62,9 +63,10 @@
                         "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/LeftPress.png);}" \
                         "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/Left.png)}"
 
-#define ENTER           "QPushButton{border-image: url(/usr/local/shencloud/image1/Enter.png);}" \
-                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/EnterPress.png);}" \
-                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/Enter.png)}"
+#define ENTER           "QPushButton{border-image: url(/usr/local/shencloud/image1/enter_new.png);}" \
+                        "QPushButton:hover{border-image: url(/usr/local/shencloud/image1/enter_new_move.png);}" \
+                        "QPushButton:pressed{border-image: url(/usr/local/shencloud/image1/enter_new_pass.png);}"\
+                        "QPushButton{color:rgb(255,255,255);}"
 
 namespace Ui {
 class LoginWidget;

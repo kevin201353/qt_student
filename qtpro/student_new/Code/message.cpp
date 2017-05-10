@@ -20,6 +20,10 @@ void call_msg_back(MsgCallBackFun fun, ReportMsg msg)
 static pthread_t g_waitid = 0;
 static pthread_t g_amqpid2 = 0;
 bool g_bshowwaitstu = false;
+
+extern pthread_t g_contid;
+extern void *thrd_connect(void *);
+
 static void *thrd_waitexec(void *param)
 {
     g_pLog->WriteLog(0,"zhaosenhua, msg_respose waitstu show. \n");
@@ -92,6 +96,7 @@ void msg_respose(ReportMsg msg)
                 {
                     //g_loginWnd->m_waitstuDialog->WaitStuHide();
                     g_loginWnd->m_waitstu->waitstuhide();
+                    g_loginWnd->SetEnable(true);
                 }
                 qDebug() << "xxxxx exit waitstu";
             }
@@ -122,8 +127,13 @@ void msg_respose(ReportMsg msg)
 			
 		}
 	   break;
-    case USER_MSG_NETDLG_HIDE:
+    case USER_MSG_FREESTUDY:
         {
+			g_pLog->WriteLog(0,"zhaosenhua, classmould  double  free study. \n");
+			if(pthread_create(&g_contid,NULL,thrd_connect, NULL))
+			{
+			        printf("create Thread Error");
+			}
         }
         break;
         default:

@@ -1,4 +1,7 @@
 #include "classmould.h"
+#include "global.h"
+#include "log.h"
+extern Log *g_pLog;
 
 ClassMould::ClassMould(QWidget *parent,QString name):QLabel(parent),m_strClassName(name)
 {
@@ -95,5 +98,12 @@ void ClassMould::SetCheckedFlag(bool flag)
 void ClassMould::mouseDoubleClickEvent(QMouseEvent *event)
 {
     qDebug("ClassMould::mouseMoveEvent  !!!!!!! .\n");
-    emit LabelDoubleclicked();
+    g_pLog->WriteLog(0,"ClassMould::mouseDoubleClickEvent  !!!!!!! .\n");
+//    emit LabelDoubleclicked();
+//    ReportMsg reportmsg;
+//    reportmsg.action = USER_WAITINGDLG_SHOW;
+//    call_msg_back(msg_respose, reportmsg);
+
+//    reportmsg.action = USER_MSG_FREESTUDY;
+//    call_msg_back(msg_respose, reportmsg);
 }

@@ -25,6 +25,7 @@ public:
     void Post(QString url, const char *append);
     void GetData(char *Buf);
     void Get(QString url);
+    void Get2(QString url);
 private:
     QNetworkAccessManager   *m_pNetManager;
     QString m_strIP;

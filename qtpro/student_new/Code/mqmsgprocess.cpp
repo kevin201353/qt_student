@@ -14,9 +14,23 @@ extern char g_szRetVm[1024];
 void *ThreadForSystem(void *para);
 extern int detect_process(char* szProcess);
 extern MyBuffer g_myBuffer;
+#ifdef ARM
 volatile long long g_interval_time = 0;
+#else
+volatile long g_interval_time = 0;
+#endif
 extern int  get_spicy_ip(char* ip);
 extern int  get_spicy_port(void);
+#ifdef ARM
+    extern long long st_heart_time;
+#else 
+    extern long st_heart_time;
+#endif 
+extern pthread_mutex_t g_hreadMutex;
+extern pthread_mutex_t g_freestudyMutex;
+extern bool  g_bExit_freeStuy_flag;
+
+extern int  g_check_heart_flag;
 void _system(char * cmd)
 {
 	FILE *fp;
@@ -155,6 +169,13 @@ void MqMsgProcess::start()
     }
 }
 
+void MqMsgProcess::_abotThread()
+{
+	pthread_cancel(m_pid);
+	pthread_join(m_pid, NULL);
+}
+
+
 void MqMsgProcess::_MqMsgProcess()
 {
     char ActionBuf[100] = {0};
@@ -168,13 +189,15 @@ void MqMsgProcess::_MqMsgProcess()
     char MessageBuf[1024];
     memset(MessageBuf,0,1024);
     cMainExitFlag = 1;
-    int nRet = 0;	
+    int nRet = 0;
     while(cMainExitFlag)
     {
         if (g_myBuffer.isEmpty())
         {
+#if 0
             qDebug() << "MqMsgProcess::_MqMsgProcess no msg : ";
 		   g_pLog->WriteLog(0,"MqMsgProcess::_MqMsgProcess no msg : ");
+#endif
             sleep(2);
             continue;
         }
@@ -197,7 +220,7 @@ void MqMsgProcess::_MqMsgProcess()
 #endif
         QString str = QString::number(leasped, 10);
         qDebug() << "current interval time : " + str;
-        if (leasped > 30000)
+        if (leasped > 40000)
         {
               qDebug()<< "msg deal timeout, msg resend.";
               char szleasped[512] = {0};
@@ -213,14 +236,29 @@ void MqMsgProcess::_MqMsgProcess()
         g_pJson->ReadJson(ActionBuf,"action");
         g_pLog->WriteLog(0,"Action:%s",ActionBuf);
         qDebug("Action:%s",ActionBuf);
+
+		if (strcmp(ActionBuf,"heartbeat") == 0)
+		{
+			pthread_mutex_lock(&g_hreadMutex);
+			//st_heart_time = __GetTime();
+			g_check_heart_flag = 0;
+			pthread_mutex_unlock(&g_hreadMutex);
+            qDebug() << "aciton : heartbeat";
+		}//heart
         if (strcmp(ActionBuf,"classbegin") == 0)
         {
             ReportMsg reportmsg;
             reportmsg.action = USER_WAITINGDLG_SHOW;
             call_msg_back(msg_respose, reportmsg);
+			pthread_mutex_lock(&g_freestudyMutex);
+			g_bExit_freeStuy_flag = true;
+			pthread_mutex_unlock(&g_freestudyMutex);
         }//begin
         if (strcmp(ActionBuf,"display") == 0)
         {
+        		pthread_mutex_lock(&g_freestudyMutex);
+			g_bExit_freeStuy_flag = true;
+			pthread_mutex_unlock(&g_freestudyMutex);
             //connect vm
             char sz_host[100] = {0};
             char sz_port[50] = {0};
@@ -235,7 +273,7 @@ void MqMsgProcess::_MqMsgProcess()
             g_pLog->WriteLog(0,"begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
             sprintf(g_szCmd, "sudo spicy -h %s -p %s -f > %s 2>&1", sz_host, sz_port, "/usr/local/shencloud/log/spicy.log");
             strcpy(g_szRetVm, g_szCmd);
-		    //=======add by linyuhua================
+		    //=======add by linyuhua================//
 		    nRet = detect_process("spicy");
             if (nRet == 1)
             {
@@ -258,7 +296,7 @@ void MqMsgProcess::_MqMsgProcess()
 					g_Pproduce->send(MessageBuf, strlen(MessageBuf));
 					g_pLog->WriteLog(0,"zhaosenhua send msg response display: %s", MessageBuf);
 				}
-			//=======add by linyuhua end================
+			//=======add by linyuhua end================//
             	}else
             	{
 			   _display_vm(g_szCmd);
@@ -314,10 +352,23 @@ void MqMsgProcess::_MqMsgProcess()
 	            {
 	                printf("create Thread Error");
 	            }
+//			   nRet = detect_process("eclass_client");
+//			   if (nRet == 1)
+//			   {
+//	                sprintf(MessageBuf,"###ap_confirmstartdemonstrate###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
+//	                g_Pproduce->send(MessageBuf, strlen(MessageBuf));
+//	                g_pLog->WriteLog(0,"zhaosenhua send msg response startdemonstrate: %s", MessageBuf);
+//			   }
+            }
+			//170505
+		   nRet = detect_process("eclass_client");
+		   if (nRet == 1)
+		   {
                 sprintf(MessageBuf,"###ap_confirmstartdemonstrate###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
                 g_Pproduce->send(MessageBuf, strlen(MessageBuf));
                 g_pLog->WriteLog(0,"zhaosenhua send msg response startdemonstrate: %s", MessageBuf);
-            	}
+		   }
+		   //170505 end
             qDebug("start_demonstrate end.");
         }//start_demonstrate
         if (strcmp(ActionBuf,"stop_demonstrate") == 0)
@@ -328,24 +379,47 @@ void MqMsgProcess::_MqMsgProcess()
             memset(MessageBuf,0,1024);
             _kill_spicy_eclass(NULL, "eclass_client");
 			nRet = detect_process("eclass_client");
+            g_loginWnd->SetEnable(true);
 		   //test
 		   char sztmp[512] = {0};
 		   sprintf(sztmp, "stop_demonstrate, detect_process(), nRet = %d.", nRet);
 		   g_pLog->WriteLog(0,sztmp);
 		   //test
-            if (nRet == 0)
-            {
-                g_pLog->WriteLog(0,"stop_demonstrate, amq response.");
+//            if (nRet == 0)
+//            {
+//                g_pLog->WriteLog(0,"stop_demonstrate, amq response.");
+//                sprintf(MessageBuf,"###ap_confirmstopdemonstrate###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
+//                g_Pproduce->send(MessageBuf,strlen(MessageBuf));
+//                g_pLog->WriteLog(0,"zhaosenhua send msg response stopdemonstrate: %s", MessageBuf);
+//            }
+//            QString strRet(g_szRetVm);
+//            if (!strRet.isEmpty() || strRet.length() > 0 && (detect_process("spicy") == 0))
+//            {
+//                _demo_display_vm(g_szRetVm);
+//                qDebug("stop_demonstrate, reset desktop.");
+//            }
+             //170505
+		    QString strRet(g_szRetVm);
+			if (nRet == 0 && (strRet.isEmpty() || strRet.length() == 0))
+			{
+			   g_pLog->WriteLog(0,"stop_demonstrate, amq response, g_szRetVm == ""and don't connect vm.");
                 sprintf(MessageBuf,"###ap_confirmstopdemonstrate###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
                 g_Pproduce->send(MessageBuf,strlen(MessageBuf));
                 g_pLog->WriteLog(0,"zhaosenhua send msg response stopdemonstrate: %s", MessageBuf);
-            }
-            QString strRet(g_szRetVm);
-            if (!strRet.isEmpty() || strRet.length() > 0 && (detect_process("spicy") == 0))
-            {
-                _demo_display_vm(g_szRetVm);
-                qDebug("stop_demonstrate, reset desktop.");
-            }
+			}
+			if (nRet == 0 && (!strRet.isEmpty() || strRet.length() > 0))
+			{
+				 _demo_display_vm(g_szRetVm);
+				 nRet = detect_process("spicy");
+				 if (nRet == 1)
+				 {
+					g_pLog->WriteLog(0,"stop_demonstrate, amq response, g_szRetVm != null, connect vm.");
+					sprintf(MessageBuf,"###ap_confirmstopdemonstrate###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
+					g_Pproduce->send(MessageBuf,strlen(MessageBuf));
+					g_pLog->WriteLog(0,"zhaosenhua send msg response stopdemonstrate: %s", MessageBuf);
+				 }
+			}
+			//170505 end 
             qDebug("stop_demonstrate end.");
         }//stop_demonstrate
         if (strcmp(ActionBuf,"freeStudy") == 0)
@@ -353,7 +427,6 @@ void MqMsgProcess::_MqMsgProcess()
             ReportMsg reportmsg;
             reportmsg.action = USER_WAITINGDLG_EXIT;
             call_msg_back(msg_respose, reportmsg);
-            g_loginWnd->show();
             myHttp http;
             http.SetUrlIP(g_strServerIP);
             _kill_spicy_eclass("spicy", "eclass_client");
@@ -362,6 +435,7 @@ void MqMsgProcess::_MqMsgProcess()
 			char JsonBuf[102400];
 			char ClassName[MAXCLASS][100];
 			char ClassID[MAXCLASS][100];
+            g_bExit_freeStuy_flag = false;
 			bool Recode = false;
 			memset(JsonBuf,0,102400);
 			qDebug("\nfreeStudy\n");
@@ -376,7 +450,9 @@ void MqMsgProcess::_MqMsgProcess()
 			g_pJson->ReadJson(&Recode,"success");
 			if(Recode)
 			{
+			    memset(g_szRetVm, 0, sizeof(g_szRetVm));
 				g_loginWnd->m_pClassNameConfig->m_iClassNum = 0;
+                g_loginWnd->show();
 				g_loginWnd->SetChecked();
 				g_Pproduce->send(MessageBuf,strlen(MessageBuf));
 				g_pLog->WriteLog(0,"zhaosenhua send msg response freeStudy: %s", MessageBuf);
@@ -392,6 +468,38 @@ void MqMsgProcess::_MqMsgProcess()
 				g_loginWnd->m_pClassNameConfig->SetLabelName();
 			}
         }
+		if (strcmp(ActionBuf,"freeDisplay") == 0)
+		{
+			 //connect vm
+            char sz_host[100] = {0};
+            char sz_port[50] = {0};
+            char sz_vmid[100] = {0};
+            //host
+            g_pJson->ReadJson_v(sz_host, "data", "host");
+            g_pJson->ReadJson_v(sz_port, "data", "port");
+            g_pJson->ReadJson_v(sz_vmid, "data", "vmId");
+            g_loginWnd->SetEnable(false);
+            system("rm -f /tmp/data_*");
+            qDebug("begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
+            g_pLog->WriteLog(0,"begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
+            sprintf(g_szCmd, "sudo spicy -h %s -p %s -f > %s 2>&1", sz_host, sz_port, "/usr/local/shencloud/log/spicy.log");
+		   _kill_spicy_eclass("spicy", "eclass_client");
+		    _display_vm(g_szCmd);
+	        nRet = detect_process("spicy");
+            if (nRet == 1)
+            {            	   
+				pthread_mutex_lock(&g_freestudyMutex);
+				g_bExit_freeStuy_flag = true;
+				pthread_mutex_unlock(&g_freestudyMutex);
+				g_pLog->WriteLog(0,"zhaosenhua freeDisplay connect vm success.");
+            }else
+            {
+				pthread_mutex_lock(&g_freestudyMutex);
+				g_bExit_freeStuy_flag = false;
+				pthread_mutex_unlock(&g_freestudyMutex);
+				g_pLog->WriteLog(0,"zhaosenhua freeDisplay connect vm failed.");
+		   }
+		}
 	    g_myBuffer.clear();
         sleep(1);
     }

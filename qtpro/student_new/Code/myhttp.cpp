@@ -43,8 +43,18 @@ void myHttp::Get(QString url)
 {
     QUrl    Tempurl(m_strIP+url);
     qDebug("URL:%s",Tempurl.toString().toStdString().c_str());
+    g_pLog->WriteLog(0,"\nURL: %s \n",Tempurl.toString().toStdString().c_str());
     m_preply = m_pNetManager->get(QNetworkRequest(Tempurl));
 }
+
+void myHttp::Get2(QString url)
+{
+    QUrl    Tempurl(url);
+    qDebug("URL:%s",Tempurl.toString().toStdString().c_str());
+    g_pLog->WriteLog(0,"\nURL: %s \n",Tempurl.toString().toStdString().c_str());
+    m_preply = m_pNetManager->get(QNetworkRequest(Tempurl));
+}
+
 void myHttp::GetData(char *Buf)
 {
     if(Buf == NULL)

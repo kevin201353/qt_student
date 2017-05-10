@@ -24,8 +24,16 @@ static char g_szCmd[1024] = {0};
 static bool g_ExitMsThread = false;
 extern char buildtime[32];
 bool   g_processThread = false;
-
 MqMsgProcess  g_mqMsgProcess;
+static pthread_t g_heartid = NULL;
+
+pthread_mutex_t g_hreadMutex;
+pthread_mutex_t g_freestudyMutex;
+
+bool  g_bExit_freeStuy_flag = false;
+extern char g_szRetVm[1024];
+
+
 
 #define SPICY_LOG_PATH  "/usr/local/shencloud/log/spicy.log"
 
@@ -36,7 +44,11 @@ static void *thrd_exec(void *param)
     return NULL;
 }
 
+#ifdef ARM
 extern unsigned long long g_interval_time;
+#else
+extern long g_interval_time;
+#endif
 extern int detect_process(char* szProcess);
 static void *MonitorSpicy(void *param)
 {
@@ -78,12 +90,76 @@ static void *MonitorSpicy(void *param)
 			//g_interval_time = (unsigned long long)abs(g_interval_time - __GetTime());
 			g_interval_time = g_interval_time - __GetTime();
 			g_pLog->WriteLog(0,"student client recv server time g_interval_time = :%lld,  _GetTime = %lld", g_interval_time, __GetTime());
-			
 		}
          sleep(15);
     }
     return NULL;
 }
+
+//heart process heart
+#ifdef ARM 
+    long long st_heart_time = 0;
+#else
+    long st_heart_time = 0;
+#endif
+
+
+
+#define  HEART_MAX_COUNT  3
+
+int    g_check_heart_flag = 0;
+
+static void *HeartThread(void *param)
+{
+//    st_heart_time = __GetTime();
+//#ifdef ARM
+//    long heart_time = 0;
+//#else
+//    long long heart_time = 0;
+//#endif
+//    char szTmp[512] = {0};
+//    bool bexit = false;
+//	while(1)
+//	{
+//		pthread_mutex_lock(&g_hreadMutex);
+//        heart_time  = __GetTime();
+//        if ( heart_time - st_heart_time > HEART_MAX_TIME)
+//		{
+//			//no recv heart msg , reboot client
+//			pthread_mutex_unlock(&g_hreadMutex);
+//            memset(szTmp, 0, sizeof(szTmp));
+//            sprintf(szTmp, "check heartbeat, reboot ClassCloudRoom_Student hearttime: %ld, st_heart_time :%ld, delay :%ld", heart_time, st_heart_time, heart_time - st_heart_time);
+//            qDebug() << szTmp;
+//            g_pLog->WriteLog(0, szTmp);
+//            bexit = true;
+//			break;
+//		}
+//        memset(szTmp, 0, sizeof(szTmp));
+//        sprintf(szTmp, "check heartbeat, __GetTime() :%ld,  st_heart_time :%ld,  delay :%ld", heart_time, st_heart_time, heart_time - st_heart_time);
+//        qDebug() <<szTmp;
+//        g_pLog->WriteLog(0, szTmp);
+//		pthread_mutex_unlock(&g_hreadMutex);
+//        sleep(2);
+//	}
+	char szTmp[512] = {0};
+	while(1)
+	{
+		if (g_check_heart_flag > HEART_MAX_COUNT)
+		{
+		 	memset(szTmp, 0, sizeof(szTmp));
+		 	sprintf(szTmp, "XXXXXXXXXXXX HeartThread, reboot MsgProcess thread.");
+			g_pLog->WriteLog(0, szTmp);
+			qDebug() << szTmp;
+			g_mqMsgProcess._abotThread();
+        		g_mqMsgProcess.start();
+			g_check_heart_flag = 0;
+		}
+		qDebug() << "check heart flag :" << g_check_heart_flag;
+		g_check_heart_flag++;
+		sleep(20);
+	}
+}
+
 
 LoginWidget::LoginWidget(QWidget *parent) :
     QWidget(parent),
@@ -108,8 +184,11 @@ LoginWidget::LoginWidget(QWidget *parent) :
     m_pShutdownPushButton = ui->ShutdownpushButton;
     m_pLeftPushButton = ui->LeftpushButton;
     m_pRightPushButton = ui->RightpushButton;
-    //m_pEnterPushButton = ui->EnterpushButton;
-    //hide information
+    m_pEnterPushButton = ui->EnterpushButton;
+    QPixmap pixmap_enter(ENTERPUSH);
+    m_pEnterPushButton->resize(pixmap_enter.width(), pixmap_enter.height());
+    m_pEnterPushButton->setVisible(true);
+    //hide informations
     m_pSoftInforLabel->hide();
     m_pSetPushButton->setEnabled(false);
     m_pSetPushButton->setVisible(false);
@@ -160,26 +239,28 @@ LoginWidget::LoginWidget(QWidget *parent) :
     connect(m_pTimer,SIGNAL(timeout()),this,SLOT(OnTimeOut()));
     SetEnable(false);
     m_pClassNameConfig = new ClassNameConfig();
-#if 0
-    SetEnable(true);
-    m_pClassNameConfig->AddClass("语文","1");
-    m_pClassNameConfig->AddClass("数学","2");
-    m_pClassNameConfig->AddClass("英语","3");
-    m_pClassNameConfig->AddClass("1","4");
-    m_pClassNameConfig->AddClass("2","5");
-    m_pClassNameConfig->AddClass("3","6");
-    m_pClassNameConfig->AddClass("4","7");
-#endif
     m_pClassNameConfig->AddLabel(m_pClassName1);
     m_pClassNameConfig->AddLabel(m_pClassName2);
     m_pClassNameConfig->AddLabel(m_pClassName3);
     m_pClassName1->SetCheckedFlag(true);
-//   m_pClassNameConfig->ChooseOne();
-//    m_pClassNameConfig->SetLabelName();
 
-//    m_pEnterPushButton->setMinimumSize(284,66);
-//    m_pEnterPushButton->setStyleSheet(ENTER);
-    //m_pEnterPushButton->setEnabled(false);
+    //m_pEnterPushButton->setMinimumSize(284,66);
+    int enter_width = m_pEnterPushButton->width();
+    int enter_height = m_pEnterPushButton->height();
+    m_pEnterPushButton->setStyleSheet(ENTER);
+   //m_pEnterPushButton->setEnabled(false);
+    int scr_width = QApplication::desktop()->width();
+    int scr_height = QApplication::desktop()->height();
+    this->resize(scr_width, scr_height);
+    m_pEnterPushButton->move(width()/2 - enter_width/2, height()/2 + 2*m_pClassName2->height()/2);
+    QFont font;
+    font.setPixelSize(30);
+//    QPalette palette = m_pEnterPushButton->palette();
+//    palette.setColor(QPalette::Text, QColor(255,255,255));
+//    m_pEnterPushButton->setPalette(palette);
+    m_pEnterPushButton->setFont(font);
+    m_pEnterPushButton->setText("进入");
+    m_pEnterPushButton->show();
     //170303
     //test
     //m_pGroupWigdet->setEnabled(true);
@@ -189,7 +270,7 @@ LoginWidget::LoginWidget(QWidget *parent) :
     connect(m_pClassName1,SIGNAL(LabelChecked()),this,SLOT(on_LabelChecked()));
     connect(m_pClassName2,SIGNAL(LabelChecked()),this,SLOT(on_LabelChecked()));
     connect(m_pClassName3,SIGNAL(LabelChecked()),this,SLOT(on_LabelChecked()));
-    //connect(m_pEnterPushButton,SIGNAL(clicked()),this,SLOT(on_EnterPushButton()));
+    connect(m_pEnterPushButton,SIGNAL(clicked()),this,SLOT(on_EnterPushButton()));
     connect(m_pClassName1,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
     connect(m_pClassName2,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
     connect(m_pClassName3,SIGNAL(LabelDoubleclicked()),this,SLOT(on_LableDoubleClicked()));
@@ -199,6 +280,10 @@ LoginWidget::LoginWidget(QWidget *parent) :
     m_waitstu = new waitstu2();
     connect(m_waitstu, SIGNAL(wait_showPassUI()), this, SLOT(on_SetpushButton_clicked()));
     connect(m_waitstu, SIGNAL(wait_shutdown()), this, SLOT(on_ShutdownpushButton_clicked()));
+
+	//heart pthread mutex
+	pthread_mutex_init(&g_hreadMutex, NULL);
+	pthread_mutex_init(&g_freestudyMutex, NULL);
     g_pNetConfig = new NetConfig();
     if(g_pLog == NULL)
     {
@@ -216,6 +301,7 @@ LoginWidget::LoginWidget(QWidget *parent) :
     }
     g_ExitMsThread = false;
     g_processThread = false;
+	g_bExit_freeStuy_flag = false;
 //    MySetConnectVm(false);
  
 //    if(g_pProcess == NULL)
@@ -269,15 +355,34 @@ LoginWidget::LoginWidget(QWidget *parent) :
     if(pthread_create(&g_amqpid,NULL,InitThread,this))
     {
     }
+
+	//monitor amq heart 
+	if(pthread_create(&g_heartid,NULL,HeartThread,this))
+    {
+    }
+#if 0
+    SetEnable(true);
+    m_pClassNameConfig->m_iClassNum = 0;
+    m_pClassNameConfig->AddClass("win_64bit", "dad5e8f5-beb4-4a5b-85fa-468de06262d4");
+    m_pClassNameConfig->AddClass("win7_32","dad5e8f5-beb4-4a5b-85fa-468de06262d4");
+    m_pClassNameConfig->AddClass("winxp_32bit","c3831381-ca4b-4090-81e0-5128b8983b22");
+    m_pClassNameConfig->ChooseOne();
+    m_pClassNameConfig->SetLabelName();
+#endif
+
+#if 1
     this->hide();
     ReportMsg reportmsg;
     reportmsg.action = USER_WAITINGDLG_SHOW;
     call_msg_back(msg_respose, reportmsg);
+#endif
+
 }
 void LoginWidget::SetEnable(bool flag)
 {
     m_pLeftPushButton->setEnabled(flag);
     m_pRightPushButton->setEnabled(flag);
+    m_pEnterPushButton->setEnabled(flag);
     m_pClassName1->setEnabled(flag);
     m_pClassName2->setEnabled(flag);
     m_pClassName3->setEnabled(flag);
@@ -531,6 +636,10 @@ LoginWidget::~LoginWidget()
     }
     g_ExitMsThread = true;
     MyMutex_destroy();
+    	pthread_mutex_destroy(&g_hreadMutex);
+	pthread_mutex_destroy(&g_freestudyMutex);
+	activemq::library::ActiveMQCPP::shutdownLibrary();
+	qDebug() << "exit, main";
     delete ui;
 }
 
@@ -627,6 +736,7 @@ void LoginWidget::on_RightPushButton()
 }
 void LoginWidget::on_LabelChecked()
 {
+    g_pLog->WriteLog(0, "LoginWidget::on_LabelChecked  !!!!!!! .\n");
     m_pClassNameConfig->ChooseOne();
     m_pClassNameConfig->SetLabelName();
 }
@@ -635,6 +745,7 @@ void LoginWidget::on_LableDoubleClicked()
 {
     //double course
     qDebug("LoginWidget::on_LableDoubleClicked  !!!!!!! .\n");
+	g_pLog->WriteLog(0, "LoginWidget::on_LableDoubleClicked  !!!!!!! .\n");
     on_EnterPushButton();
 }
 
@@ -644,112 +755,125 @@ void LoginWidget::paintEvent(QPaintEvent *event)
     painter.drawPixmap(0,0,width(),height(),QPixmap(DESKTOPMAP));
 }
 
-static pthread_t g_contid = 0;
-static void *thrd_connect(void *)
+pthread_t g_contid = 0;
+void *thrd_connect(void *)
 {
     LoginWidget  *loginWid = (LoginWidget  *)g_loginWnd;
     if (loginWid == NULL)
+    {
+         g_pLog->WriteLog(0,"thrd_connect, loginWid == NULL xxxxx .");
         return NULL;
-	myHttp http;
-	http.SetUrlIP(g_strServerIP);
+    }
     QString name = loginWid->m_pClassNameConfig->GetClassName();
     QString id = loginWid->m_pClassNameConfig->GetClassID();
     qDebug("Name :%s ID:%s",name.toStdString().c_str(),id.toStdString().c_str());
     g_pLog->WriteLog(0,"Name :%s ID:%s",name.toStdString().c_str(),id.toStdString().c_str());
-    bool ReturnCode = false;
-    char TempBuf[100];
+    //bool ReturnCode = false;
+    char TempBuf[1024];
     char JsonBuf[1024];
-    int Port = 0;
+    //int Port = 0;
     char IP[20];
     char Ticket[50];
     memset(IP,0,20);
     memset(Ticket,0,50);
     memset(JsonBuf,0,1024);
-    memset(TempBuf,0,100);
+    memset(TempBuf,0,1024);
     if(strlen(g_strRoomNum)!= 0 && strlen(g_strSeatNum) != 0)
     {
-        sprintf(TempBuf,"seatNumber=%s&roomName=%s&courseId=%s",g_strSeatNum,g_strRoomNum,id.toStdString().c_str());
+        sprintf(TempBuf,"/service/desktops/stu_display?seatNumber=%s&roomName=%s&courseId=%s&apId=%s",g_strSeatNum,g_strRoomNum,id.toStdString().c_str(), g_strTerminalID);
     }
     g_pLog->WriteLog(0,"Stuself Connect Post Buf:%s",TempBuf);
    // qDebug("Stuself Connect Post Buf:%s",TempBuf);
+   // sprintf(TempBuf,"http://192.168.8.234:9090/service/desktops/stu_display");
     int run_count = 0;
-    while(run_count <= 180)  //tree miniture exit
+    while(run_count <= 30)  //one miniture exit
     {
-        http.Post("/service/desktops/stu_display",TempBuf);
+        pthread_mutex_lock(&g_freestudyMutex);
+		if (g_bExit_freeStuy_flag)
+		{
+			pthread_mutex_unlock(&g_freestudyMutex);
+			break;
+		}
+		pthread_mutex_unlock(&g_freestudyMutex);
+	    	myHttp http;
+        http.SetUrlIP(g_strServerIP);
+        //http.Post("/service/desktops/stu_display",TempBuf);
+        http.Get(TempBuf);
         http.GetData(JsonBuf);
-        //qDebug("Connect Json:%s",JsonBuf);
-        g_pLog->WriteLog(0,"Connect Json:%s",JsonBuf);
-        g_pJson->Parse(JsonBuf);
-        ReturnCode = false;
-        g_pJson->ReadJson(&ReturnCode,"success");
-        if(ReturnCode)
-        {
-            g_pJson->ReadJson_v(&Port,"data","port");
-            g_pJson->ReadJson_v(IP,"data","host");
-            g_pJson->ReadJson_v(Ticket,"data","ticket");
-            memset(g_pProcess->m_strVmID,0,50);
-            g_pJson->ReadJson_v(g_pProcess->m_strVmID,"data","vmId");
-            qDebug("IP:%s Port:%d Ticket:%s",IP,Port,Ticket);
-            g_pLog->WriteLog(0,"IP:%s Port:%d Ticket:%s VmID:%s",IP,Port,Ticket,g_pProcess->m_strVmID);
-            system("cat /tmp/data_*");
-            system("rm -f /tmp/data_*");
-            sprintf(g_szCmd, "sudo spicy -h %s -p %d -f > %s 2>&1", IP, Port, "/usr/local/shencloud/log/spicy.log");
-            if (pthread_create(&g_xtid, NULL, thrd_exec, NULL) != 0)
-            {
-                g_pLog->WriteLog(0,"zhaosenhua create spicy thread failed.");
-            }
-            int ncount = 0;
-            while(access("/tmp/data_port",F_OK))
-            {
-                if (ncount >= 20)
-                {
-                    break;
-                }
-                ncount++;
-                sleep(1);
-            }
-            system("cat /tmp/data_*");
-            char port[20];
-            memset(port,0,20);
-            FILE *pf = fopen("/tmp/data_port","r");
-            if(pf != NULL)
-            {
-                fread(port,20,1,pf);
-                g_pLog->WriteLog(0,"/tmp/data_port:%s",port);
-                fclose(pf);
-            }
-            char data_xor[20];
-            memset(data_xor,0,20);
-            pf = fopen("/tmp/data_xor","r");
-            if(pf != NULL)
-            {
-                fread(data_xor,20,1,pf);
-                g_pLog->WriteLog(0,"/tmp/data_xor:%s",data_xor);
-                fclose(pf);
-            }
-            char append[1024];
-            memset(append,0,1024);
-            sprintf(append,"vmId=%s&connected=true&apIp=%s&apMac=%s&dsPort=%s&dsXor=%s",\
-                    g_pProcess->m_strVmID,g_pProcess->m_strIP,g_pProcess->m_strMac,port,data_xor);
-            g_pLog->WriteLog(0,"Report Action:%s",append);
-            http.Post("/service/aps/report_action",append);
-            memset(JsonBuf,0,1024);
-            http.GetData(JsonBuf);
-            g_pLog->WriteLog(0,"student report action:%s\n",JsonBuf);
-            g_pJson->Parse(JsonBuf);
-            g_pJson->ReadJson(&ReturnCode,"success");
-            if(ReturnCode)
-            {
-                g_pLog->WriteLog(0,"Report connect[true] Success");
-                break;
-            }
-            else
-            {
-                g_pLog->WriteLog(0,"Report connect[true] Error");
-            }
-        }
+//        //qDebug("Connect Json:%s",JsonBuf);
+//        g_pLog->WriteLog(0,"Connect Json:%s",JsonBuf);
+//        g_pJson->Parse(JsonBuf);
+//        ReturnCode = false;
+//        g_pJson->ReadJson(&ReturnCode,"success");
+//        if(ReturnCode)
+//        {
+//            g_pJson->ReadJson_v(&Port,"data","port");
+//            g_pJson->ReadJson_v(IP,"data","host");
+//            g_pJson->ReadJson_v(Ticket,"data","ticket");
+//            memset(g_pProcess->m_strVmID,0,50);
+//            g_pJson->ReadJson_v(g_pProcess->m_strVmID,"data","vmId");
+//            qDebug("IP:%s Port:%d Ticket:%s",IP,Port,Ticket);
+//            g_pLog->WriteLog(0,"IP:%s Port:%d Ticket:%s VmID:%s",IP,Port,Ticket,g_pProcess->m_strVmID);
+//            system("cat /tmp/data_*");
+//            system("rm -f /tmp/data_*");
+//            sprintf(g_szCmd, "sudo spicy -h %s -p %d -f > %s 2>&1", IP, Port, "/usr/local/shencloud/log/spicy.log");
+//            if (pthread_create(&g_xtid, NULL, thrd_exec, NULL) != 0)
+//            {
+//                g_pLog->WriteLog(0,"zhaosenhua create spicy thread failed.");
+//            }
+//            int ncount = 0;
+//            while(access("/tmp/data_port",F_OK))
+//            {
+//                if (ncount >= 20)
+//                {
+//                    break;
+//                }
+//                ncount++;
+//                sleep(1);
+//            }
+//            system("cat /tmp/data_*");
+//            char port[20];
+//            memset(port,0,20);
+//            FILE *pf = fopen("/tmp/data_port","r");
+//            if(pf != NULL)
+//            {
+//                fread(port,20,1,pf);
+//                g_pLog->WriteLog(0,"/tmp/data_port:%s",port);
+//                fclose(pf);
+//            }
+//            char data_xor[20];
+//            memset(data_xor,0,20);
+//            pf = fopen("/tmp/data_xor","r");
+//            if(pf != NULL)
+//            {
+//                fread(data_xor,20,1,pf);
+//                g_pLog->WriteLog(0,"/tmp/data_xor:%s",data_xor);
+//                fclose(pf);
+//            }
+//            char append[1024];
+//            memset(append,0,1024);
+//            sprintf(append,"vmId=%s&connected=true&apIp=%s&apMac=%s&dsPort=%s&dsXor=%s",\
+//                    g_pProcess->m_strVmID,g_pProcess->m_strIP,g_pProcess->m_strMac,port,data_xor);
+//            g_pLog->WriteLog(0,"Report Action:%s",append);
+//            http.Post("/service/aps/report_action",append);
+//            memset(JsonBuf,0,1024);
+//            http.GetData(JsonBuf);
+//            g_pLog->WriteLog(0,"student report action:%s\n",JsonBuf);
+//            g_pJson->Parse(JsonBuf);
+//            g_pJson->ReadJson(&ReturnCode,"success");
+//            if(ReturnCode)
+//            {
+//            	   strcpy(g_szRetVm, g_szCmd);
+//                g_pLog->WriteLog(0,"Report connect[true] Success");
+//                break;
+//            }
+//            else
+//            {
+//                g_pLog->WriteLog(0,"Report connect[true] Error");
+//            }
+//        }
         run_count++;
-        sleep(1);
+        sleep(5);
     }//while
     ReportMsg reportmsg;
     reportmsg.action = USER_WAITINGDLG_EXIT;
@@ -759,12 +883,11 @@ static void *thrd_connect(void *)
 
 void LoginWidget::on_EnterPushButton()
 {
-    
+    qDebug() << "on_EnterPushButton  enter !!!!";
     ReportMsg reportmsg;
     reportmsg.action = USER_WAITINGDLG_SHOW;
     call_msg_back(msg_respose, reportmsg);
-    
-    //m_pEnterPushButton->setEnabled(false);
+    SetEnable(false);
     if(pthread_create(&g_contid,NULL,thrd_connect, NULL))
     {
         printf("create Thread Error");
@@ -816,7 +939,6 @@ void LoginWidget::createPipe()
 
 void LoginWidget::UpdateNetOffDialog()
 {
-
     if (m_pMyDialog)
     {
         qDebug() << "hide netoff dailog 0000.";
