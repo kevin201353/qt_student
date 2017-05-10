@@ -44,8 +44,6 @@ public:
     virtual ~ActiveMQProduce();
     void start( const std::string& brokerURI, unsigned int numMessages, const std::string& destURI, bool useTopic, bool clientAck);
     void send(const char* bytesMessage,int nSize);
-
-private:
     void cleanup();
     virtual void initialize();
 
@@ -76,7 +74,6 @@ public:
     virtual void onException( const CMSException& ex AMQCPP_UNUSED );
     virtual void transportInterrupted();
     virtual void transportResumed();
-private:
     void cleanup();
     void mycleanup();
 private:

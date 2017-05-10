@@ -90,6 +90,8 @@ public:
     void createPipe();
     void initConfig();
     void SetEnable(bool flag);
+    void rebootAmqThrd();
+    void widget_resize();
 private slots:
     void OnTimeOut();
     void on_SetpushButton_clicked();

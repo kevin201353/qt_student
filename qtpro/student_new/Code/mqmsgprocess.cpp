@@ -239,10 +239,17 @@ void MqMsgProcess::_MqMsgProcess()
 
 		if (strcmp(ActionBuf,"heartbeat") == 0)
 		{
+            g_pLog->WriteLog(0,"zhaosenhua send msg heartbeat enter.");
 			pthread_mutex_lock(&g_hreadMutex);
 			//st_heart_time = __GetTime();
 			g_check_heart_flag = 0;
 			pthread_mutex_unlock(&g_hreadMutex);
+            //test
+            memset(MessageBuf,0,1024);
+            sprintf(MessageBuf,"###ap_confirmheartbeat###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
+            g_Pproduce->send(MessageBuf, strlen(MessageBuf));
+            g_pLog->WriteLog(0,"zhaosenhua send msg response heartbeat: %s", MessageBuf);
+            //test
             qDebug() << "aciton : heartbeat";
 		}//heart
         if (strcmp(ActionBuf,"classbegin") == 0)

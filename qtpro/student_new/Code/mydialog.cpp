@@ -16,6 +16,8 @@ MyDialog::MyDialog(QWidget *parent) :
     this->setWindowModality(Qt::ApplicationModal);
 //    this->setMinimumSize(400,200);
 //    this->setMaximumSize(400,200);
+    m_show = false;
+    ui->label_title->setText("提示");
     m_Font.setPixelSize(20);
     m_pTextLabel->setFont(m_Font);
     m_pOKPushButton->setMinimumSize(80,30);
@@ -56,8 +58,8 @@ void MyDialog::setFlag(int flag)
             break;
         default:
         {
+            ui->label_title->setText("提示");
             ui->label_title->setVisible(false);
-            ui->label_title->setText("");
         }
     }
 }
@@ -108,6 +110,7 @@ void MyDialog::setNetOff(QString text, int flag)
     m_flag = flag;
     m_content = text;
     m_pTextLabel->setText(text);
+    ui->label_title->setText("提示");
     //m_nCount = 10;
     //m_timer = NULL;
     //m_timer = new QTimer(this);

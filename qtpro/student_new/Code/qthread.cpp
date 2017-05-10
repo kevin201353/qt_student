@@ -30,7 +30,7 @@ void qthread::run()
         {
             emit NoticeHide();
         }
-        sleep(2);
+        sleep(5);
     }
 }
 

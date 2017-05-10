@@ -152,6 +152,10 @@ static void *HeartThread(void *param)
 			qDebug() << szTmp;
 			g_mqMsgProcess._abotThread();
         		g_mqMsgProcess.start();
+            if (NULL != g_loginWnd)
+            {
+                g_loginWnd->rebootAmqThrd();
+            }
 			g_check_heart_flag = 0;
 		}
 		qDebug() << "check heart flag :" << g_check_heart_flag;
@@ -185,8 +189,6 @@ LoginWidget::LoginWidget(QWidget *parent) :
     m_pLeftPushButton = ui->LeftpushButton;
     m_pRightPushButton = ui->RightpushButton;
     m_pEnterPushButton = ui->EnterpushButton;
-    QPixmap pixmap_enter(ENTERPUSH);
-    m_pEnterPushButton->resize(pixmap_enter.width(), pixmap_enter.height());
     m_pEnterPushButton->setVisible(true);
     //hide informations
     m_pSoftInforLabel->hide();
@@ -245,14 +247,8 @@ LoginWidget::LoginWidget(QWidget *parent) :
     m_pClassName1->SetCheckedFlag(true);
 
     //m_pEnterPushButton->setMinimumSize(284,66);
-    int enter_width = m_pEnterPushButton->width();
-    int enter_height = m_pEnterPushButton->height();
-    m_pEnterPushButton->setStyleSheet(ENTER);
    //m_pEnterPushButton->setEnabled(false);
-    int scr_width = QApplication::desktop()->width();
-    int scr_height = QApplication::desktop()->height();
-    this->resize(scr_width, scr_height);
-    m_pEnterPushButton->move(width()/2 - enter_width/2, height()/2 + 2*m_pClassName2->height()/2);
+    widget_resize();
     QFont font;
     font.setPixelSize(30);
 //    QPalette palette = m_pEnterPushButton->palette();
@@ -941,10 +937,10 @@ void LoginWidget::UpdateNetOffDialog()
 {
     if (m_pMyDialog)
     {
-        qDebug() << "hide netoff dailog 0000.";
+        qDebug() << "show netoff dailog 0000.";
         if (!m_pMyDialog->getShow())
         {
-            qDebug() << "hide netoff dailog.";
+            qDebug() << "show netoff dailog.";
             m_pMyDialog->setShow(true);
             m_pMyDialog->show();
             m_pMyDialog->setNetOff("网络异常，请联系管理员!", 5);
@@ -960,4 +956,37 @@ void LoginWidget::HideNetOffDialog()
         m_pMyDialog->setShow(false);
         m_pMyDialog->hide();
     }
+}
+
+void LoginWidget::rebootAmqThrd()
+{
+    pthread_cancel(g_amqpid);
+    pthread_join(g_amqpid, NULL);
+    if (NULL != g_Pconsume)
+    {
+        g_Pconsume->cleanup();
+    }
+    if (NULL != g_Pproduce)
+    {
+        g_Pproduce->cleanup();
+    }
+    if(pthread_create(&g_amqpid,NULL,InitThread,this))
+    {
+    }
+}
+
+void LoginWidget::widget_resize()
+{
+    int scr_width = QApplication::desktop()->width();
+    int scr_height = QApplication::desktop()->height();
+    float factor_x = (float)scr_width/g_scr_old_width;
+    float factor_y = (float)scr_height/g_scr_old_height;
+    my_resize(this, factor_x, factor_y);
+    QPixmap pixmap_enter(ENTERPUSH);
+    m_pEnterPushButton->resize(pixmap_enter.width(), pixmap_enter.height());
+    my_resize(m_pEnterPushButton, factor_x, factor_y);
+    int enter_width = m_pEnterPushButton->width();
+    int enter_height = m_pEnterPushButton->height();
+    m_pEnterPushButton->setStyleSheet(ENTER);
+    m_pEnterPushButton->move(scr_width/2 - enter_width/2, scr_height/2 + 2*m_pClassName2->height()/2);
 }
