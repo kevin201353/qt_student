@@ -23,6 +23,8 @@ bool g_bshowwaitstu = false;
 
 extern pthread_t g_contid;
 extern void *thrd_connect(void *);
+extern pthread_mutex_t g_freestudyMutex;
+extern bool  g_bExit_freeStuy_flag;
 
 static void *thrd_waitexec(void *param)
 {
@@ -97,6 +99,9 @@ void msg_respose(ReportMsg msg)
                     //g_loginWnd->m_waitstuDialog->WaitStuHide();
                     g_loginWnd->m_waitstu->waitstuhide();
                     g_loginWnd->SetEnable(true);
+                    pthread_mutex_lock(&g_freestudyMutex);
+                    g_bExit_freeStuy_flag = false;
+                    pthread_mutex_unlock(&g_freestudyMutex);
                 }
                 qDebug() << "xxxxx exit waitstu";
             }
@@ -115,6 +120,14 @@ void msg_respose(ReportMsg msg)
         case USER_AMQ_RESET:
         {
             g_pLog->WriteLog(0,"zhaosenhua, msg_respose reset amq prcess, network is unreachable. \n");
+            if (NULL != g_Pconsume)
+            {
+                g_Pconsume->cleanup();
+            }
+            if (NULL != g_Pproduce)
+            {
+                g_Pproduce->cleanup();
+            }
             if(pthread_create(&g_amqpid2, NULL,InitThread, g_loginWnd))
             {
 
@@ -134,6 +147,20 @@ void msg_respose(ReportMsg msg)
 			{
 			        printf("create Thread Error");
 			}
+        }
+        break;
+    case USER_MSG_AMQPRODUCE:
+        {
+            if (NULL != g_Pproduce)
+            {
+                g_Pproduce->cleanup();
+                g_Pproduce = NULL;
+            }
+            if(g_Pproduce == NULL)
+            {
+                g_Pproduce = new ActiveMQProduce();
+                g_Pproduce->start(g_strProduceAdd,20,g_strProduceQueue,false,false);
+            }
         }
         break;
         default:

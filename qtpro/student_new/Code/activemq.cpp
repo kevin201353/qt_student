@@ -94,6 +94,13 @@ void ActiveMQProduce::send(const char* Message,int nSize)
         {
             e.printStackTrace();
             g_pLog->WriteLog(0,"zhaosenhua amq ActiveMQProduce::send message onException @@@@ , error: %s\n", e.getMessage().c_str());
+            QString str(e.getMessage().c_str());
+            if (str == "ActiveMQProducerKernel - Producer Already Closed")
+            {
+                ReportMsg reportmsg;
+                reportmsg.action = USER_MSG_AMQPRODUCE;
+                call_msg_back(msg_respose, reportmsg);
+            }
         }
      }
 }

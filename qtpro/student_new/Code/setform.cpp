@@ -6,6 +6,8 @@
 #include "global.h"
 #include <QDesktopWidget>
 #include <QDebug>
+#include <QFontDatabase>
+
 extern NetConfig   *g_pNetConfig;
 extern char g_strRoomNum[100];
 extern char g_strSeatNum[20];
@@ -130,6 +132,11 @@ SetForm::SetForm(QWidget *parent) :
     ui->listWidget_Ping->clear();
     ui->btn_network->setText("检测");
     ui->btn_network->setStyleSheet("background-color:rgb(255,153,19);color:rgb(255,255,255)");
+    QString fontName = loadFontFromFile("/usr/local/share/fonts/uming.ttc");
+    QFont font(fontName);
+    font.setPointSize(18);
+    font.setBold(true);
+    ui->label_title->setFont(font);
     ui->label_title->setText("学生终端配置");
 
 #if 1

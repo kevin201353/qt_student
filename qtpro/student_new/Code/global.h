@@ -20,6 +20,7 @@
 #define USET_MSG_PROCESSMSG    107
 
 #define USER_MSG_FREESTUDY     108
+#define USER_MSG_AMQPRODUCE    109
 
 #define FIFO_PIPE   "/usr/local/shencloud/student_fifo"
 
@@ -70,6 +71,7 @@ extern float g_scr_old_width;
 extern float g_scr_old_height;
 extern bool  g_processThread;
 extern int my_resize(QWidget* widget, float factorX, float factorY);
+extern QString loadFontFromFile(QString path);
 #define PIPE_WAIT(x) ({msg_send(x);})
 #endif // GLOBAL_H
 

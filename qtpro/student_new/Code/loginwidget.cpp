@@ -105,7 +105,7 @@ static void *MonitorSpicy(void *param)
 
 
 
-#define  HEART_MAX_COUNT  3
+#define  HEART_MAX_COUNT  2
 
 int    g_check_heart_flag = 0;
 
@@ -144,22 +144,29 @@ static void *HeartThread(void *param)
 	char szTmp[512] = {0};
 	while(1)
 	{
-		if (g_check_heart_flag > HEART_MAX_COUNT)
-		{
-		 	memset(szTmp, 0, sizeof(szTmp));
-		 	sprintf(szTmp, "XXXXXXXXXXXX HeartThread, reboot MsgProcess thread.");
-			g_pLog->WriteLog(0, szTmp);
-			qDebug() << szTmp;
-			g_mqMsgProcess._abotThread();
-        		g_mqMsgProcess.start();
-            if (NULL != g_loginWnd)
-            {
-                g_loginWnd->rebootAmqThrd();
-            }
-			g_check_heart_flag = 0;
-		}
-		qDebug() << "check heart flag :" << g_check_heart_flag;
-		g_check_heart_flag++;
+        if (g_bSetupAmq)
+        {
+           int ret = ping_net(g_strServerIP);
+           if (ret == 1)
+           {
+               if (g_check_heart_flag > HEART_MAX_COUNT)
+               {
+                   memset(szTmp, 0, sizeof(szTmp));
+                   sprintf(szTmp, "XXXXXXXXXXXX HeartThread, reboot MsgProcess thread.");
+                   g_pLog->WriteLog(0, szTmp);
+                   qDebug() << szTmp;
+                   g_mqMsgProcess._abotThread();
+                   g_mqMsgProcess.start();
+                   if (NULL != g_loginWnd)
+                   {
+                       g_loginWnd->rebootAmqThrd();
+                   }
+                   g_check_heart_flag = 0;
+               }
+               qDebug() << "check heart flag :" << g_check_heart_flag;
+               g_check_heart_flag++;
+           }
+        }
 		sleep(20);
 	}
 }
@@ -174,6 +181,7 @@ LoginWidget::LoginWidget(QWidget *parent) :
     g_loginWnd = NULL;
     g_loginWnd = this;
     InitMyMutex();
+    activemq::library::ActiveMQCPP::initializeLibrary();
     m_pLogoQLable = ui->Logolabel;
     m_pLogoQLable->setAlignment(Qt::AlignCenter);
     //m_pLogoQLable->setPixmap(QPixmap(LOGOPNG));
@@ -353,9 +361,9 @@ LoginWidget::LoginWidget(QWidget *parent) :
     }
 
 	//monitor amq heart 
-	if(pthread_create(&g_heartid,NULL,HeartThread,this))
-    {
-    }
+//	if(pthread_create(&g_heartid,NULL,HeartThread,this))
+//    {
+//    }
 #if 0
     SetEnable(true);
     m_pClassNameConfig->m_iClassNum = 0;
@@ -403,7 +411,6 @@ void *InitThread(void *param)
         qDebug() << "wait net running.\n";
         sleep(2);
     }
-    activemq::library::ActiveMQCPP::initializeLibrary();
     g_Pconsume = NULL;
     g_Pproduce = NULL;
     if(g_Pconsume == NULL)
@@ -424,7 +431,8 @@ void *InitThread(void *param)
         g_Pproduce->start(g_strProduceAdd,20,g_strProduceQueue,false,false);
     }
     g_mqMsgProcess.GetAddrMac();
-#ifdef ARM
+//#ifdef  ARM
+#if 1
 	myHttp http;
 	http.SetUrlIP(g_strServerIP);
 	char data[100] = {0};

@@ -812,8 +812,10 @@ int detect_process(char* szProcess)
     fp = popen(command, "r");
     if (fp == NULL)
     {
-        qDebug("detect_process popen failed.\n");
-        g_pLog->WriteLog(0,"detect_process popen failed.\n");
+        char szlog[512] = {0};
+        sprintf(szlog, "detect_process popen failed : %s, with errno : %d", strerror(errno), errno);
+        qDebug() << szlog;
+        g_pLog->WriteLog(0, szlog);
         return -1;
     }
     if (fgets(buf, BUF_SIZE, fp) != NULL)

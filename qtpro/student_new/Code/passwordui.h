@@ -36,6 +36,5 @@ private:
     QString   m_strPassword;
     static bool   m_isAdjust;
     QDialog*     m_tmpDialog;
-    QFont           m_Font;
 };
 #endif // PASSWORDUI_H

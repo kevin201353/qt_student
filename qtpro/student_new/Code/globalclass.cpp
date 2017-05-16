@@ -98,6 +98,7 @@ int ping_net(char *ip)
         char data[100] = {0};
         sprintf(szbuf, "sudo ping %s -c 4 > /usr/local/shencloud/log/ping_net.log", ip);
         system(szbuf);
+        MyMutex_lock();
         FILE *fp = fopen("/usr/local/shencloud/log/ping_net.log", "r");
         if (fp != NULL)
         {
@@ -105,14 +106,17 @@ int ping_net(char *ip)
             {
                 if (strstr(data, "ttl=")!= NULL && strstr(data, "time=") != NULL)
                 {
+                    MyMutex_unlock();
                     return 1;
                 }else if (strstr(data, "Destination Host Unreachable"))
                 {
+                    MyMutex_unlock();
                     return 0;
                 }
             }
             fclose(fp);
         }
+        MyMutex_unlock();
     }
     return 0;
 }

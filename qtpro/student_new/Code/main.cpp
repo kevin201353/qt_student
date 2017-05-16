@@ -4,8 +4,27 @@
 #include "include.h"
 #include "waitstu2.h"
 #include "stwidget.h"
+#include <QFontDatabase>
+#include <QFont>
+#include <QString>
+
 
 extern void *WhileFun(void *param);
+QString loadFontFromFile(QString path)
+{
+    static QString font;
+    static bool loaded = false;
+    if(!loaded)
+    {
+        loaded = true;
+        int loadedFontID = QFontDatabase::addApplicationFont(path);
+        QStringList loadedFontFamilies = QFontDatabase::applicationFontFamilies(loadedFontID);
+        if(!loadedFontFamilies.empty())
+            font = loadedFontFamilies.at(0);
+    }
+    return font;
+}
+
 int main(int argc, char *argv[])
 {
     int iRecode = 0;
@@ -24,9 +43,9 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     LoginWidget w;
     w.showFullScreen();
-    //QFont  font;
-    //font.setFamily("Ms Shell Dlg 2");
-    //a.setFont(font);
+    QString fontName = loadFontFromFile("/usr/local/share/fonts/uming.ttc");
+	QFont font(fontName);
+	QApplication::setFont(font);
     //w.show();
     //stwidget st;
     //st.show();

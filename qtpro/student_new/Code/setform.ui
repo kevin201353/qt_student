@@ -417,8 +417,7 @@
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 24pt &quot;Noto Sans CJK JP&quot;;
-color: rgb(255, 255, 255);</string>
+     <string notr="true">color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string>TextLabel</string>
