@@ -31,6 +31,9 @@ extern pthread_mutex_t g_freestudyMutex;
 extern bool  g_bExit_freeStuy_flag;
 
 extern int  g_check_heart_flag;
+int  g_currclass_state = 0;
+extern bool g_bSetupAmq;
+
 void _system(char * cmd)
 {
     FILE *fp = NULL;
@@ -151,6 +154,14 @@ void _demo_display_vm(char *)
 MqMsgProcess::MqMsgProcess(QObject *parent) : QObject(parent)
 {
     memset(g_szRetVm, 0, sizeof(g_szRetVm));
+    m_pidsp = NULL;
+}
+
+MqMsgProcess::~MqMsgProcess()
+{
+    _abotThread();
+    pthread_cancel(m_pidsp);
+    pthread_join(m_pidsp, NULL);
 }
 
 static void *ProcessFun(void *param)
@@ -172,8 +183,8 @@ void MqMsgProcess::start()
 void MqMsgProcess::_abotThread()
 {
     cMainExitFlag = 0;
-	pthread_cancel(m_pid);
-	pthread_join(m_pid, NULL);
+    pthread_cancel(m_pid);
+    pthread_join(m_pid, NULL);
 }
 
 
@@ -216,13 +227,20 @@ void MqMsgProcess:: _MqMsgProcess()
 #ifdef ARM
         unsigned long long leasped = abs(last_time - leaspedtmp);
 #else
-        //long  leaspedtmp = atol(datetime);
-        //long leasped = abs(last_time - leaspedtmp);
+
+#if 1
+        long  leaspedtmp = atol(datetime);
+        long leasped = last_time - leaspedtmp;
+#endif
+
+#if 0
         //add 170515 new
         long  leaspedtmp = atoll(datetime);
         leaspedtmp -= g_interval_time;
         unsigned long leasped = abs(last_time - leaspedtmp);
         //add end
+#endif
+
 #endif
         QString str = QString::number(leasped, 10);
         qDebug() << "current interval time : " + str;
@@ -242,7 +260,6 @@ void MqMsgProcess:: _MqMsgProcess()
         g_pJson->ReadJson(ActionBuf,"action");
         g_pLog->WriteLog(0,"Action:%s",ActionBuf);
         qDebug("Action:%s",ActionBuf);
-
 		if (strcmp(ActionBuf,"heartbeat") == 0)
 		{
             g_pLog->WriteLog(0,"zhaosenhua send msg heartbeat enter.");
@@ -250,12 +267,13 @@ void MqMsgProcess:: _MqMsgProcess()
 			//st_heart_time = __GetTime();
 			g_check_heart_flag = 0;
 			pthread_mutex_unlock(&g_hreadMutex);
-//            //test
-//            memset(MessageBuf,0,1024);
-//            sprintf(MessageBuf,"###ap_confirmheartbeat###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
-//            g_Pproduce->send(MessageBuf, strlen(MessageBuf));
-//            g_pLog->WriteLog(0,"zhaosenhua send msg response heartbeat: %s", MessageBuf);
-//            //test
+             g_currclass_state = 0;
+            //test
+            memset(MessageBuf,0,1024);
+            sprintf(MessageBuf,"###ap_confirmheartbeat###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
+            g_Pproduce->send(MessageBuf, strlen(MessageBuf));
+            g_pLog->WriteLog(0,"zhaosenhua send msg response heartbeat: %s", MessageBuf);
+            //test
             qDebug() << "aciton : heartbeat";
 		}//heart
         if (strcmp(ActionBuf,"classbegin") == 0)
@@ -266,9 +284,11 @@ void MqMsgProcess:: _MqMsgProcess()
 			pthread_mutex_lock(&g_freestudyMutex);
 			g_bExit_freeStuy_flag = true;
 			pthread_mutex_unlock(&g_freestudyMutex);
+             g_currclass_state = 0;
         }//begin
         if (strcmp(ActionBuf,"display") == 0)
         {
+             g_currclass_state = 0;
         		pthread_mutex_lock(&g_freestudyMutex);
 			g_bExit_freeStuy_flag = true;
 			pthread_mutex_unlock(&g_freestudyMutex);
@@ -303,6 +323,7 @@ void MqMsgProcess:: _MqMsgProcess()
 				nRet2 = detect_process("spicy");
 				if (nRet2 == 1)
 				{
+                     g_currclass_state = 1;
                     g_pLog->WriteLog(0,"/tmp/data_port 00000:%ld", port1);
                     g_pLog->WriteLog(0,"/tmp/data_xor 00000:%ld", atol(data_xor));
 					sprintf(MessageBuf,"###ap_confirmdisplay###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\", \"apIp\":\"%s\",\"mac\":\"%s\", \"vmId\":\"%s\", \"connected\":%d, \"dsPort\":%ld, \"dsXor\":%ld}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID, m_strIP, m_strMac, sz_vmid, 1, atol(port), atol(data_xor));
@@ -316,6 +337,7 @@ void MqMsgProcess:: _MqMsgProcess()
 	            nRet = detect_process("spicy");
 	            if (nRet == 1)
 	            {
+                    g_currclass_state = 1;
 	                g_pLog->WriteLog(0,"/tmp/data_port 11111:%ld", atol(port));
 	                g_pLog->WriteLog(0,"/tmp/data_xor 11111:%ld", atol(data_xor));
 	                sprintf(MessageBuf,"###ap_confirmdisplay###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\", \"apIp\":\"%s\",\"mac\":\"%s\", \"vmId\":\"%s\", \"connected\":%d, \"dsPort\":%ld, \"dsXor\":%ld}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID, m_strIP, m_strMac, sz_vmid, 1, atol(port), atol(data_xor));
@@ -328,6 +350,7 @@ void MqMsgProcess:: _MqMsgProcess()
         if (strcmp(ActionBuf,"classover") == 0)
         {
             qDebug("classover enter.");
+            g_currclass_state = 0;
             memset(MessageBuf,0,1024);
             g_loginWnd->SetEnable(false);
 		   g_pLog->WriteLog(0,"zhaosenhua send msg response classover.");
@@ -344,6 +367,7 @@ void MqMsgProcess:: _MqMsgProcess()
         if (strcmp(ActionBuf,"start_demonstrate") == 0)
         {
             qDebug("start_demonstrate enter.");
+            g_currclass_state = 0;
             memset(MessageBuf,0,1024);
             g_loginWnd->SetEnable(false);
             char szCommand[1024] = {0};
@@ -386,6 +410,7 @@ void MqMsgProcess:: _MqMsgProcess()
         }//start_demonstrate
         if (strcmp(ActionBuf,"stop_demonstrate") == 0)
         {
+            g_currclass_state = 0;
             memset(MessageBuf,0,1024);
             qDebug("stop_demonstrate enter.");
             //system("sudo /usr/local/shencloud/enable_input.sh &");
@@ -426,6 +451,7 @@ void MqMsgProcess:: _MqMsgProcess()
 				 nRet = detect_process("spicy");
 				 if (nRet == 1)
 				 {
+                     g_currclass_state = 1;
 					g_pLog->WriteLog(0,"stop_demonstrate, amq response, g_szRetVm != null, connect vm.");
 					sprintf(MessageBuf,"###ap_confirmstopdemonstrate###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
 					g_Pproduce->send(MessageBuf,strlen(MessageBuf));
@@ -437,6 +463,7 @@ void MqMsgProcess:: _MqMsgProcess()
         }//stop_demonstrate
         if (strcmp(ActionBuf,"freeStudy") == 0)
         {
+            g_currclass_state = 0;
             ReportMsg reportmsg;
             reportmsg.action = USER_WAITINGDLG_EXIT;
             call_msg_back(msg_respose, reportmsg);
@@ -483,6 +510,7 @@ void MqMsgProcess:: _MqMsgProcess()
         }
 		if (strcmp(ActionBuf,"freeDisplay") == 0)
 		{
+            g_currclass_state = 0;
 		   memset(MessageBuf, 0, 1024);
 			 //connect vm
             char sz_host[100] = {0};
@@ -501,7 +529,8 @@ void MqMsgProcess:: _MqMsgProcess()
 		    _display_vm(g_szCmd);
 	        nRet = detect_process("spicy");
             if (nRet == 1)
-            {            	   
+            {
+                g_currclass_state = 1;
 				pthread_mutex_lock(&g_freestudyMutex);
 				g_bExit_freeStuy_flag = true;
 				pthread_mutex_unlock(&g_freestudyMutex);
@@ -531,4 +560,54 @@ void MqMsgProcess::GetAddrMac()
     netconfig.GetIPAddr(m_strIP);
     memset(m_strMac,0,50);
     netconfig.GetMacAdd(m_strMac,true);
+}
+/********************************************************************/
+   //add 170517
+/********************************************************************/
+static void *SpicyThrdFun(void *param)
+{
+    MqMsgProcess *Temp = (MqMsgProcess*)param;
+    Temp->_spicyProcess();
+    return NULL;
+}
+
+void MqMsgProcess::strart_spicyThrd()
+{
+    GetAddrMac();
+    if(pthread_create(&m_pidsp,NULL,SpicyThrdFun,this))
+    {
+        printf("Create Error!\n");
+    }
+}
+
+void MqMsgProcess::_spicyProcess()
+{
+    int nRet = 0;
+    while(cMainExitFlag)
+    {
+        if (g_currclass_state == 1)
+        {
+            //connected vm
+            nRet = detect_process("spicy");
+            if (nRet == 0)
+            {
+                if (g_bSetupAmq)
+                {
+                   int ret = ping_net(g_strServerIP);
+                   if (ret == 1)
+                   {
+                      QString strRet(g_szRetVm);
+                      if (!strRet.isEmpty() || strRet.length() > 0)
+                      {
+                          _display_vm(g_szRetVm);
+                          g_pLog->WriteLog(0,"zhaosenhua MqMsgProcess::_spicyProcess reconnect vm.");
+                      }
+                   }
+                }
+            }
+        }
+        //qDebug() << "MqMsgProcess::_spicyProcess loop.";
+        sleep(2);
+    }
+    g_pLog->WriteLog(0,"zhaosenhua MqMsgProcess::_spicyProcess exit !!!");
 }

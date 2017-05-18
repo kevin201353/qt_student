@@ -45,32 +45,41 @@ void ActiveMQProduce::initialize()
         // Create a Connection
         try{
             connection = connectionFactory->createConnection();
-            connection->start();
+            if (NULL != connection)
+                connection->start();
         } catch( CMSException& e )
         {
             e.printStackTrace();
-            throw e;
+            //throw e;
         }
 
-        // Create a Session
-        if( clientAck ) {
-            session = connection->createSession( Session::CLIENT_ACKNOWLEDGE );
-        } else {
-            session = connection->createSession( Session::AUTO_ACKNOWLEDGE );
-        }
+        if (NULL != connection)
+        {
+            // Create a Session
+            if( clientAck ) {
+                session = connection->createSession( Session::CLIENT_ACKNOWLEDGE );
+            } else {
+                session = connection->createSession( Session::AUTO_ACKNOWLEDGE );
+            }
+            // Create the destination (Topic or Queue)
+            if (NULL != session)
+            {
+                if( useTopic ) {
+                    destination = session->createTopic( destURI );
+                } else {
+                    destination = session->createQueue( destURI );
+                }
 
-        // Create the destination (Topic or Queue)
-        if( useTopic ) {
-            destination = session->createTopic( destURI );
-        } else {
-            destination = session->createQueue( destURI );
+                // Create a MessageProducer from the Session to the Topic or Queue
+                producer = session->createProducer( destination );
+                if (NULL != producer)
+                    producer->setDeliveryMode( DeliveryMode::NON_PERSISTENT );
+            }
         }
-
-        // Create a MessageProducer from the Session to the Topic or Queue
-        producer = session->createProducer( destination );
-        producer->setDeliveryMode( DeliveryMode::NON_PERSISTENT );
     }catch ( CMSException& e )
     {
+        QString str(e.getMessage().c_str());
+        qDebug() << "ActiveMQProduce::initialize createConnection: " + str;
         e.printStackTrace();
         g_pLog->WriteLog(0,"zhaosenhua amq ActiveMQProduce::initialize onException @@@@ , error: %s\n", e.getMessage().c_str());
     }
@@ -82,14 +91,20 @@ void ActiveMQProduce::send(const char* Message,int nSize)
      if( producer != NULL )
      {
         try {
-             bytesMessage = session->createBytesMessage((unsigned char*)Message,nSize);
+             if (NULL != session)
+             {
+                bytesMessage = session->createBytesMessage((unsigned char*)Message,nSize);
+             }
          }catch(CMSException& e)
          {
              e.printStackTrace();
              g_pLog->WriteLog(0,"zhaosenhua amq ActiveMQProduce::createBytesMessage onException @@@@ , error: %s\n", e.getMessage().c_str());
          }
         try{
-           producer->send(bytesMessage);
+            if (NULL != bytesMessage)
+            {
+                producer->send(bytesMessage);
+            }
         }catch(CMSException& e)
         {
             e.printStackTrace();
@@ -181,48 +196,49 @@ void ActiveMQConsumer::runConsumer()
         // Create a ConnectionFactory
         ActiveMQConnectionFactory* connectionFactory = new ActiveMQConnectionFactory( brokerURI );
 
+        if (NULL == connectionFactory)
+            return;
         // Create a Connection
+         qDebug() << "MessageConsumer  aaaaa";
         connection = connectionFactory->createConnection();
-        delete connectionFactory;
-
-       // ActiveMQConnection* amqConnection = dynamic_cast<ActiveMQConnection*>(connection);
-        ActiveMQConnection *amqConnection = (ActiveMQConnection *)connection;
-        if( amqConnection != NULL )
+        qDebug() << "MessageConsumer  bbbbb";
+        //delete connectionFactory;
+        if (NULL != connection)
         {
- //           amqConnection->addTransportListener((TransportListener*)this);
-           // amqConnection->add
+            connection->start();
+            connection->setExceptionListener(this);
+            // Create a Session
+            if( clientAck )
+            {
+                session = connection->createSession( Session::CLIENT_ACKNOWLEDGE );
+            }
+            else
+            {
+                session = connection->createSession( Session::AUTO_ACKNOWLEDGE );
+            }
+            if (NULL != session)
+            {
+                if( useTopic )
+                {
+                    destination = session->createTopic( destURI );
+                }
+                else
+                {
+                    destination = session->createQueue( destURI );
+                }
+                // Create a MessageConsumer from the Session to the Topic or Queue
+                qDebug() << "MessageConsumer  0000";
+                consumer = session->createConsumer( destination );
+                qDebug() << "MessageConsumer  1111";
+                producer = session->createProducer(destination);
+                qDebug() << "MessageConsumer  2222";
+                consumer->setMessageListener( this );
+            }
         }
-        connection->start();
-        connection->setExceptionListener(this);
-        // Create a Session
-        if( clientAck )
-        {
-            session = connection->createSession( Session::CLIENT_ACKNOWLEDGE );
-        }
-        else
-        {
-            session = connection->createSession( Session::AUTO_ACKNOWLEDGE );
-        }
-
-        // Create the destination (Topic or Queue)
-        if( useTopic )
-        {
-            destination = session->createTopic( destURI );
-        }
-        else
-        {
-            destination = session->createQueue( destURI );
-        }
-
-        // Create a MessageConsumer from the Session to the Topic or Queue
-        consumer = session->createConsumer( destination );
-        producer = session->createProducer(destination);
-        consumer->setMessageListener( this );
-
     } catch (CMSException& e)
     {
         QString str(e.getMessage().c_str());
-        qDebug() << "dddddd " + str;
+        qDebug() << "runConsumer: " + str;
         e.printStackTrace();
         if (str == "Network is unreachable")
         {
@@ -239,6 +255,7 @@ void ActiveMQConsumer::onMessage( const Message* message )
     static int count = 0;
     try
     {
+        //qDebug() << "MessageConsumer  ccccc";
         count++;
         const BytesMessage* bytesMessage = dynamic_cast< const BytesMessage* >( message );
         string text;

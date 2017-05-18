@@ -109,7 +109,7 @@ static void *MonitorSpicy(void *param)
 
 int    g_check_heart_flag = 0;
 
-static void *HeartThread(void *param)
+static void *   HeartThread(void *param)
 {
 //    st_heart_time = __GetTime();
 //#ifdef ARM
@@ -153,7 +153,7 @@ static void *HeartThread(void *param)
                {
                    memset(szTmp, 0, sizeof(szTmp));
                    sprintf(szTmp, "XXXXXXXXXXXX HeartThread, reboot MsgProcess thread.");
-                   g_pLog->WriteLog(0, szTmp);
+                   //g_pLog->WriteLog(0, szTmp);
                    qDebug() << szTmp;
                    g_mqMsgProcess._abotThread();
                    g_mqMsgProcess.start();
@@ -170,7 +170,6 @@ static void *HeartThread(void *param)
 		sleep(20);
 	}
 }
-
 
 LoginWidget::LoginWidget(QWidget *parent) :
     QWidget(parent),
@@ -317,8 +316,15 @@ LoginWidget::LoginWidget(QWidget *parent) :
 //            printf("New process Error\n");
 //        }
 //    }
+#if 1
+    this->hide();
+    ReportMsg reportmsg;
+    reportmsg.action = USER_WAITINGDLG_SHOW;
+    call_msg_back(msg_respose, reportmsg);
+#endif
     initConfig();
     g_mqMsgProcess.start();
+    g_mqMsgProcess.strart_spicyThrd();
     g_bSetupAmq = false;
     //create_msg_queue();
     wait_net_setup();
@@ -361,9 +367,9 @@ LoginWidget::LoginWidget(QWidget *parent) :
     }
 
 	//monitor amq heart 
-//	if(pthread_create(&g_heartid,NULL,HeartThread,this))
-//    {
-//    }
+    if(pthread_create(&g_heartid,NULL,HeartThread,this))
+    {
+    }
 #if 0
     SetEnable(true);
     m_pClassNameConfig->m_iClassNum = 0;
@@ -373,15 +379,8 @@ LoginWidget::LoginWidget(QWidget *parent) :
     m_pClassNameConfig->ChooseOne();
     m_pClassNameConfig->SetLabelName();
 #endif
-
-#if 1
-    this->hide();
-    ReportMsg reportmsg;
-    reportmsg.action = USER_WAITINGDLG_SHOW;
-    call_msg_back(msg_respose, reportmsg);
-#endif
-
 }
+
 void LoginWidget::SetEnable(bool flag)
 {
     m_pLeftPushButton->setEnabled(flag);
@@ -527,10 +526,11 @@ void LoginWidget::initConfig()
     GetConfigString(CONFIGNAME,"MQ","ProduceQueue","edu_Queue",g_strProduceQueue,50);
     GetConfigString(CONFIGNAME,"ROOM","ServiceIP","192.168.120.36",g_strServerIP,25);
     qDebug("Service:%s",g_strServerIP);
-    strcpy(g_strConsumerAdd,"tcp://");
+    strcpy(g_strConsumerAdd,"failover://(tcp://");
     strcat(g_strConsumerAdd,g_strServerIP);
     strcat(g_strConsumerAdd,":61616");
-    strcpy(g_strProduceAdd,g_strConsumerAdd);
+    strcat(g_strConsumerAdd, ")?connectionTimeout=5000&timeout=5000");
+      strcpy(g_strProduceAdd, g_strConsumerAdd);
     qDebug("ActiveMQ Server:%s Recv Queue:%s Send Queue:%s",g_strConsumerAdd, g_strConsumerQueue,g_strProduceQueue);
     qDebug(g_strProduceAdd);
     GetConfigString(CONFIGNAME,"ROOM","ClassName","Default",g_strRoomNum,100);
@@ -968,7 +968,6 @@ void LoginWidget::HideNetOffDialog()
 
 void LoginWidget::rebootAmqThrd()
 {
-    pthread_cancel(g_amqpid);
     pthread_join(g_amqpid, NULL);
     if (NULL != g_Pconsume)
     {
