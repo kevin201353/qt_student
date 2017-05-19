@@ -228,12 +228,12 @@ void MqMsgProcess:: _MqMsgProcess()
         unsigned long long leasped = abs(last_time - leaspedtmp);
 #else
 
-#if 1
+#if 0
         long  leaspedtmp = atol(datetime);
         long leasped = last_time - leaspedtmp;
 #endif
 
-#if 0
+#if 1
         //add 170515 new
         long  leaspedtmp = atoll(datetime);
         leaspedtmp -= g_interval_time;
@@ -268,12 +268,12 @@ void MqMsgProcess:: _MqMsgProcess()
 			g_check_heart_flag = 0;
 			pthread_mutex_unlock(&g_hreadMutex);
              g_currclass_state = 0;
-            //test
-            memset(MessageBuf,0,1024);
-            sprintf(MessageBuf,"###ap_confirmheartbeat###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
-            g_Pproduce->send(MessageBuf, strlen(MessageBuf));
-            g_pLog->WriteLog(0,"zhaosenhua send msg response heartbeat: %s", MessageBuf);
-            //test
+//            //test
+//            memset(MessageBuf,0,1024);
+//            sprintf(MessageBuf,"###ap_confirmheartbeat###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
+//            g_Pproduce->send(MessageBuf, strlen(MessageBuf));
+//            g_pLog->WriteLog(0,"zhaosenhua send msg response heartbeat: %s", MessageBuf);
+//            //test
             qDebug() << "aciton : heartbeat";
 		}//heart
         if (strcmp(ActionBuf,"classbegin") == 0)

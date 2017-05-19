@@ -107,10 +107,12 @@ int ping_net(char *ip)
                 if (strstr(data, "ttl=")!= NULL && strstr(data, "time=") != NULL)
                 {
                     MyMutex_unlock();
+                    fclose(fp);
                     return 1;
                 }else if (strstr(data, "Destination Host Unreachable"))
                 {
                     MyMutex_unlock();
+                    fclose(fp);
                     return 0;
                 }
             }

@@ -112,9 +112,9 @@ void ActiveMQProduce::send(const char* Message,int nSize)
             QString str(e.getMessage().c_str());
             if (str == "ActiveMQProducerKernel - Producer Already Closed")
             {
-                ReportMsg reportmsg;
-                reportmsg.action = USER_MSG_AMQPRODUCE;
-                call_msg_back(msg_respose, reportmsg);
+//                ReportMsg reportmsg;
+//                reportmsg.action = USER_MSG_AMQPRODUCE;
+//                call_msg_back(msg_respose, reportmsg);
             }
         }
      }
@@ -199,9 +199,7 @@ void ActiveMQConsumer::runConsumer()
         if (NULL == connectionFactory)
             return;
         // Create a Connection
-         qDebug() << "MessageConsumer  aaaaa";
         connection = connectionFactory->createConnection();
-        qDebug() << "MessageConsumer  bbbbb";
         //delete connectionFactory;
         if (NULL != connection)
         {
@@ -227,11 +225,8 @@ void ActiveMQConsumer::runConsumer()
                     destination = session->createQueue( destURI );
                 }
                 // Create a MessageConsumer from the Session to the Topic or Queue
-                qDebug() << "MessageConsumer  0000";
                 consumer = session->createConsumer( destination );
-                qDebug() << "MessageConsumer  1111";
                 producer = session->createProducer(destination);
-                qDebug() << "MessageConsumer  2222";
                 consumer->setMessageListener( this );
             }
         }
@@ -242,9 +237,9 @@ void ActiveMQConsumer::runConsumer()
         e.printStackTrace();
         if (str == "Network is unreachable")
         {
-            ReportMsg reportmsg;
-            reportmsg.action = USER_AMQ_RESET;
-            call_msg_back(msg_respose, reportmsg);
+//            ReportMsg reportmsg;
+//            reportmsg.action = USER_AMQ_RESET;
+//            call_msg_back(msg_respose, reportmsg);
         }
     }
 }
@@ -255,7 +250,6 @@ void ActiveMQConsumer::onMessage( const Message* message )
     static int count = 0;
     try
     {
-        //qDebug() << "MessageConsumer  ccccc";
         count++;
         const BytesMessage* bytesMessage = dynamic_cast< const BytesMessage* >( message );
         string text;
@@ -312,7 +306,7 @@ void ActiveMQConsumer::onException( const CMSException& ex AMQCPP_UNUSED )
     printf("CMS Exception occurred.  Shutting down client.\n");
     g_pLog->WriteLog(0,"zhaosenhua amq received message onException @@@@ , error: %s\n", ex.getMessage().c_str());
     //to here, network inter
-    g_resetamq = true;
+    //g_resetamq = true;
     //exit(1);
 }
 

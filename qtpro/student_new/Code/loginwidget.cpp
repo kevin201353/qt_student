@@ -157,10 +157,10 @@ static void *   HeartThread(void *param)
                    qDebug() << szTmp;
                    g_mqMsgProcess._abotThread();
                    g_mqMsgProcess.start();
-                   if (NULL != g_loginWnd)
-                   {
-                       g_loginWnd->rebootAmqThrd();
-                   }
+//                   if (NULL != g_loginWnd)
+//                   {
+//                       g_loginWnd->rebootAmqThrd();
+//                   }
                    g_check_heart_flag = 0;
                }
                qDebug() << "check heart flag :" << g_check_heart_flag;
@@ -331,7 +331,7 @@ LoginWidget::LoginWidget(QWidget *parent) :
     g_resetamq = false;
     g_exitMonitoramq = false;
     g_bshowwaitstu = false;
-    amq_monitor();
+    //amq_monitor();
     m_pqthread = NULL;
     m_pqthread = new qthread();
     connect(m_pqthread, SIGNAL(NoticeShow()), this, SLOT(UpdateNetOffDialog()));

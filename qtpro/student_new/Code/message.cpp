@@ -108,31 +108,31 @@ void msg_respose(ReportMsg msg)
             break;
         case USER_WAITINGDLG_RESET:
         {
-            g_pLog->WriteLog(0,"zhaosenhua, msg_respose reset amq prcess. \n");
-            qDebug() << "zhaosenhua, msg_respose reset amq prcess. \n";
-            if (g_Pconsume != NULL)
-            {
-                g_Pconsume->runConsumer();
-                //g_resetamq = false;
-            }
+//            g_pLog->WriteLog(0,"zhaosenhua, msg_respose reset amq prcess. \n");
+//            qDebug() << "zhaosenhua, msg_respose reset amq prcess. \n";
+//            if (g_Pconsume != NULL)
+//            {
+//                g_Pconsume->runConsumer();
+//                //g_resetamq = false;
+//            }
         }
         break;
         case USER_AMQ_RESET:
         {
-            g_pLog->WriteLog(0,"zhaosenhua, msg_respose reset amq prcess, network is unreachable. \n");
-            if (NULL != g_Pconsume)
-            {
-                g_Pconsume->cleanup();
-            }
-            if (NULL != g_Pproduce)
-            {
-                g_Pproduce->cleanup();
-            }
-            if(pthread_create(&g_amqpid2, NULL,InitThread, g_loginWnd))
-            {
+//            g_pLog->WriteLog(0,"zhaosenhua, msg_respose reset amq prcess, network is unreachable. \n");
+//            if (NULL != g_Pconsume)
+//            {
+//                g_Pconsume->cleanup();
+//            }
+//            if (NULL != g_Pproduce)
+//            {
+//                g_Pproduce->cleanup();
+//            }
+//            if(pthread_create(&g_amqpid2, NULL,InitThread, g_loginWnd))
+//            {
 
-            }
-            qDebug() << "zhaosenhua, msg_respose reset amq prcess. network is unreachable.\n";
+//            }
+//            qDebug() << "zhaosenhua, msg_respose reset amq prcess. network is unreachable.\n";
         }
         break;
 	   case USET_MSG_PROCESSMSG:
@@ -151,16 +151,16 @@ void msg_respose(ReportMsg msg)
         break;
     case USER_MSG_AMQPRODUCE:
         {
-            if (NULL != g_Pproduce)
-            {
-                g_Pproduce->cleanup();
-                g_Pproduce = NULL;
-            }
-            if(g_Pproduce == NULL)
-            {
-                g_Pproduce = new ActiveMQProduce();
-                g_Pproduce->start(g_strProduceAdd,20,g_strProduceQueue,false,false);
-            }
+//            if (NULL != g_Pproduce)
+//            {
+//                g_Pproduce->cleanup();
+//                g_Pproduce = NULL;
+//            }
+//            if(g_Pproduce == NULL)
+//            {
+//                g_Pproduce = new ActiveMQProduce();
+//                g_Pproduce->start(g_strProduceAdd,20,g_strProduceQueue,false,false);
+//            }
         }
         break;
         default:
