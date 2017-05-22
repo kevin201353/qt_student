@@ -85,7 +85,7 @@ void _display_vm(char *cmd)
     {
         if (nCount >= 50)
             break;
-		usleep(100000);
+        usleep(100000);
         nCount++;
     }
     memset(port,0,20);
@@ -267,7 +267,6 @@ void MqMsgProcess:: _MqMsgProcess()
 			//st_heart_time = __GetTime();
 			g_check_heart_flag = 0;
 			pthread_mutex_unlock(&g_hreadMutex);
-             g_currclass_state = 0;
 //            //test
 //            memset(MessageBuf,0,1024);
 //            sprintf(MessageBuf,"###ap_confirmheartbeat###{\"datetime\":\"%s\",\"data\":{\"action\":\"%s\",\"id\":\"%s\"}}", str_time.toStdString().c_str(), ActionBuf, g_strTerminalID);
@@ -305,6 +304,8 @@ void MqMsgProcess:: _MqMsgProcess()
             qDebug("begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
             g_pLog->WriteLog(0,"begin class IP:%s Port:%s VmID:%s", sz_host, sz_port, sz_vmid);
             sprintf(g_szCmd, "sudo spicy -h %s -p %s -f > %s 2>&1", sz_host, sz_port, "/usr/local/shencloud/log/spicy.log");
+            //sprintf(g_szCmd, "sudo spicy -h %s -p %s -f", sz_host, sz_port);
+            qDebug() << g_szCmd;
             strcpy(g_szRetVm, g_szCmd);
 		    //=======add by linyuhua================//
 		    nRet = detect_process("spicy");
@@ -564,6 +565,7 @@ void MqMsgProcess::GetAddrMac()
 /********************************************************************/
    //add 170517
 /********************************************************************/
+bool  g_spicyProcessExit = false;
 static void *SpicyThrdFun(void *param)
 {
     MqMsgProcess *Temp = (MqMsgProcess*)param;
@@ -583,7 +585,7 @@ void MqMsgProcess::strart_spicyThrd()
 void MqMsgProcess::_spicyProcess()
 {
     int nRet = 0;
-    while(cMainExitFlag)
+    while(!g_spicyProcessExit)
     {
         if (g_currclass_state == 1)
         {

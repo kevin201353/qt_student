@@ -32,7 +32,7 @@ pthread_mutex_t g_freestudyMutex;
 
 bool  g_bExit_freeStuy_flag = false;
 extern char g_szRetVm[1024];
-
+extern bool  g_spicyProcessExit;
 
 
 #define SPICY_LOG_PATH  "/usr/local/shencloud/log/spicy.log"
@@ -322,6 +322,7 @@ LoginWidget::LoginWidget(QWidget *parent) :
     reportmsg.action = USER_WAITINGDLG_SHOW;
     call_msg_back(msg_respose, reportmsg);
 #endif
+    g_spicyProcessExit = false;
     initConfig();
     g_mqMsgProcess.start();
     g_mqMsgProcess.strart_spicyThrd();
@@ -642,6 +643,7 @@ LoginWidget::~LoginWidget()
     MyMutex_destroy();
     	pthread_mutex_destroy(&g_hreadMutex);
 	pthread_mutex_destroy(&g_freestudyMutex);
+    g_spicyProcessExit = true;
 	activemq::library::ActiveMQCPP::shutdownLibrary();
 	qDebug() << "exit, main";
     delete ui;

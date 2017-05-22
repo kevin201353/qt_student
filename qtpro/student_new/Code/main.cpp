@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     LoginWidget w;
     w.showFullScreen();
-    QString fontName = loadFontFromFile("/usr/local/share/fonts/uming.ttc");
+    QString fontName = loadFontFromFile("/usr/local/share/fonts/msyh.ttc");
 	QFont font(fontName);
 	QApplication::setFont(font);
     //w.show();

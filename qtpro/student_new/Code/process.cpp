@@ -821,11 +821,11 @@ int detect_process(char* szProcess)
     if (fgets(buf, BUF_SIZE, fp) != NULL)
     {
         count = atoi(buf);
-		//test
-		char sztmp[512] = {0};
-		sprintf(sztmp, "22222  detect_process(), fgets buf = %s.", buf);
-		g_pLog->WriteLog(0,sztmp);
-		//test
+//		//test
+//		char sztmp[512] = {0};
+//		sprintf(sztmp, "22222  detect_process(), fgets buf = %s.", buf);
+//		g_pLog->WriteLog(0,sztmp);
+//		//test
         if (count == 0)
             nRet = 0;
         else

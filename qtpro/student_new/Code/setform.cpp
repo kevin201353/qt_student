@@ -132,10 +132,10 @@ SetForm::SetForm(QWidget *parent) :
     ui->listWidget_Ping->clear();
     ui->btn_network->setText("检测");
     ui->btn_network->setStyleSheet("background-color:rgb(255,153,19);color:rgb(255,255,255)");
-    QString fontName = loadFontFromFile("/usr/local/share/fonts/uming.ttc");
+    QString fontName = loadFontFromFile("/usr/local/share/fonts/msyh.ttf");
     QFont font(fontName);
     font.setPointSize(18);
-    font.setBold(true);
+    //font.setBold(true);
     ui->label_title->setFont(font);
     ui->label_title->setText("学生终端配置");
 
@@ -368,9 +368,9 @@ void SetForm::on_IPlineEdit_textChanged(const QString &arg1)
     iRecode = m_pRegValue->validate(args,pos);
     if(iRecode == 1)
     {
-        QPalette palette;
-        palette.setColor(QPalette::Text,Qt::red);
-        m_pIPLineEdit->setPalette(palette);
+//        QPalette palette;
+//        palette.setColor(QPalette::Text,Qt::red);
+//        m_pIPLineEdit->setPalette(palette);
         m_pSavePushButton->setEnabled(false);
     }
     if(iRecode == 2)
@@ -398,9 +398,9 @@ void SetForm::on_ChildIPlineEdit_textChanged(const QString &arg1)
     iRecode = m_pRegValue->validate(args,pos);
     if(iRecode == 1)
     {
-        QPalette palette;
-        palette.setColor(QPalette::Text,Qt::red);
-        m_pChildIPLineEdit->setPalette(palette);
+//        QPalette palette;
+//        palette.setColor(QPalette::Text,Qt::red);
+//        m_pChildIPLineEdit->setPalette(palette);
         m_pSavePushButton->setEnabled(false);
     }
     if(iRecode == 2)
@@ -428,9 +428,9 @@ void SetForm::on_GetWaylineEdit_textChanged(const QString &arg1)
     iRecode = m_pRegValue->validate(args,pos);
     if(iRecode == 1)
     {
-        QPalette palette;
-        palette.setColor(QPalette::Text,Qt::red);
-        m_pGetWayLineEdit->setPalette(palette);
+//        QPalette palette;
+//        palette.setColor(QPalette::Text,Qt::red);
+//        m_pGetWayLineEdit->setPalette(palette);
         m_pSavePushButton->setEnabled(false);
     }
     if(iRecode == 2)
@@ -458,9 +458,9 @@ void SetForm::on_DNS1lineEdit_textChanged(const QString &arg1)
     iRecode = m_pRegValue->validate(args,pos);
     if(iRecode == 1)
     {
-        QPalette palette;
-        palette.setColor(QPalette::Text,Qt::red);
-        m_pDNS1LineEdit->setPalette(palette);
+//        QPalette palette;
+//        palette.setColor(QPalette::Text,Qt::red);
+//        m_pDNS1LineEdit->setPalette(palette);
         m_pSavePushButton->setEnabled(false);
     }
     if(iRecode == 2)
@@ -488,9 +488,9 @@ void SetForm::on_DNS2lineEdit_textChanged(const QString &arg1)
     iRecode = m_pRegValue->validate(args,pos);
     if(iRecode == 1)
     {
-        QPalette palette;
-        palette.setColor(QPalette::Text,Qt::red);
-        m_pDNS2LineEdit->setPalette(palette);
+//        QPalette palette;
+//        palette.setColor(QPalette::Text,Qt::red);
+//        m_pDNS2LineEdit->setPalette(palette);
         m_pSavePushButton->setEnabled(false);
     }
     if(iRecode == 2)
@@ -518,9 +518,9 @@ void SetForm::on_DNS3lineEdit_textChanged(const QString &arg1)
     iRecode = m_pRegValue->validate(args,pos);
     if(iRecode == 1)
     {
-        QPalette palette;
-        palette.setColor(QPalette::Text,Qt::red);
-        m_pDNS3LineEdit->setPalette(palette);
+//        QPalette palette;
+//        palette.setColor(QPalette::Text,Qt::red);
+//        m_pDNS3LineEdit->setPalette(palette);
         m_pSavePushButton->setEnabled(false);
     }
     if(iRecode == 2)

@@ -37,10 +37,10 @@ MyDialog::MyDialog(QWidget *parent) :
     ui->title_bar->setVisible(false);
     connect(ui->btnClose, SIGNAL(clicked(bool)), this, SLOT(exit_widget()));
     ui->btnClose->setVisible(true);
-    QString fontName = loadFontFromFile("/usr/local/share/fonts/uming.ttc");
+    QString fontName = loadFontFromFile("/usr/local/share/fonts/msyh.ttf");
     QFont font(fontName);
     font.setPointSize(16);
-    font.setBold(true);
+    //font.setBold(true);
     ui->label_title->setFont(font);
     widget_resize();
 }

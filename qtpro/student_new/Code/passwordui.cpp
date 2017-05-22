@@ -33,10 +33,10 @@ PasswordUI::PasswordUI(QWidget *parent) :
     bb = md.result();
     m_strPassword.append(bb.toHex());
     m_isAdjust = false;
-    QString fontName = loadFontFromFile("/usr/local/share/fonts/uming.ttc");
+    QString fontName = loadFontFromFile("/usr/local/share/fonts/msyh.ttf");
     QFont font(fontName);
     font.setPointSize(16);
-    font.setBold(true);
+    //font.setBold(true);
     ui->label_title->setFont(font);
     ui->label_title->setText("输入密码");
     font.setBold(false);
